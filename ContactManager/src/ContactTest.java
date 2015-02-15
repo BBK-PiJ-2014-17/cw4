@@ -35,7 +35,7 @@ public class ContactTest {
     @Test
     public void testGetName() throws Exception {
 
-        assertEquals(expectedName, c.getId());
+        assertEquals(expectedName, c.getName());
 
     }
 
