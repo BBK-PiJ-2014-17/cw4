@@ -13,6 +13,7 @@ import org.hamcrest.beans.SamePropertyValuesAs;
 import org.hamcrest.collection.IsCollectionWithSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class MeetingTest {
 
@@ -50,6 +51,13 @@ public class MeetingTest {
     public void testGetDate() throws Exception {
 
         assertEquals(expectedDate, m.getDate());
+
+    }
+
+    @Test
+    public void testContactsContainsAtLeastOneContact() throws Exception {
+
+        assertTrue(m.getContacts().size() >= 1);
 
     }
 
