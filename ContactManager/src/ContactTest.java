@@ -6,11 +6,17 @@ import static org.junit.Assert.assertEquals;
 public class ContactTest {
 
     private Contact c;
+    private int expectedId;
+    private String expectedName, expectedNotes;
 
     @Before
     public void setUp() throws Exception {
 
-        c = new ContactImpl(1, "Basil Mason");
+        expectedId = 1;
+        expectedName = "Basil Mason";
+        expectedNotes = "This is a note.";
+
+        c = new ContactImpl(expectedId, expectedName);
 
     }
 
@@ -22,12 +28,14 @@ public class ContactTest {
     @Test
     public void testGetId() throws Exception {
 
-        assertEquals(1, c.getId());
+        assertEquals(expectedId, c.getId());
 
     }
 
     @Test
     public void testGetName() throws Exception {
+
+        assertEquals(expectedName, c.getId());
 
     }
 
