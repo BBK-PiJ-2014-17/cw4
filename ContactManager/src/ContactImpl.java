@@ -52,7 +52,7 @@ public class ContactImpl implements Contact {
      */
     @Override
     public void addNotes(String note) {
-        contactNotes = contactNotes + note + "\n";
+        contactNotes = contactNotes + note;
     }
 
 }
