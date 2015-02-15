@@ -50,5 +50,8 @@ public class ContactTest {
     @Test
     public void testAddNotes() throws Exception {
 
+        c.addNotes(expectedNotes);
+        assertEquals(expectedNotes, c.getNotes());
+
     }
 }
