@@ -9,6 +9,21 @@ public class ContactImpl implements Contact {
     private int contactId;
     private String contactName, contactNotes;
 
+    // constructors
+
+    public ContactImpl(int contactId, String contactName) {
+
+        // by default notes is an empty string
+        this(contactId, contactName, "");
+
+    }
+
+    public ContactImpl(int contactId, String contactName, String contactNotes) {
+        this.contactId = contactId;
+        this.contactName = contactName;
+        this.contactNotes = contactNotes;
+    }
+
     /** {@inheritDoc}
      *
      */
@@ -37,8 +52,7 @@ public class ContactImpl implements Contact {
      */
     @Override
     public void addNotes(String note) {
-
+        contactNotes = contactNotes + note + "\n";
     }
-
 
 }
