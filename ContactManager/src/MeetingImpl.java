@@ -9,19 +9,41 @@ import java.util.Set;
 
 public class MeetingImpl implements Meeting {
 
+    // class variables
 
+    private int meetingId;
+    private Calendar meetingDate;
+    private Set<Contact> meetingContacts;
+
+    // constructors
+
+    public MeetingImpl(int meetingId, Calendar meetingDate, Set<Contact> meetingContacts) {
+        this.meetingId = meetingId;
+        this.meetingDate = meetingDate;
+        this.meetingContacts = meetingContacts;
+    }
+
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public int getId() {
-        return 0;
+        return meetingId;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public Calendar getDate() {
-        return null;
+        return meetingDate;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public Set<Contact> getContacts() {
-        return null;
+        return meetingContacts;
     }
 }
