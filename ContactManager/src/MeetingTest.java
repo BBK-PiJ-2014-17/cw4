@@ -65,6 +65,11 @@ public class MeetingTest {
     public void testGetContacts() throws Exception {
 
         Set<Contact> ret = m.getContacts();
+
+        //Set<Contact> ret = new HashSet<Contact>();    // fail case
+        //ret.add(new ContactImpl(1, "Basil blahblah"));
+        //ret.add(new ContactImpl(2, "Rebecca blahblah"));
+
         Set<Matcher<Contact>> matcher = new HashSet<Matcher<Contact>>();
 
         // create a matcher that checks for the property values of each Contact
