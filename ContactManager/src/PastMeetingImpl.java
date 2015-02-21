@@ -8,10 +8,29 @@ import java.util.Set;
  */
 public class PastMeetingImpl implements PastMeeting {
 
+    // class variables
 
-    public PastMeetingImpl() {
+    private int meetingId;
+    private Calendar meetingDate;
+    private Set<Contact> meetingContacts;
+    private String meetingNotes;
 
+    // constructors
 
+    // fully specified constructor
+    public PastMeetingImpl(int meetingId, Calendar meetingDate, Set<Contact> meetingContacts, String meetingNotes) {
+        this.meetingId = meetingId;
+        this.meetingDate = meetingDate;
+        this.meetingContacts = meetingContacts;
+        this.meetingNotes = meetingNotes;
+    }
+
+    // copy constructor
+    public PastMeetingImpl(Meeting meeting, String meetingNotes) {
+        this.meetingId = meeting.getId();
+        this.meetingDate = meeting.getDate();
+        this.meetingContacts = meeting.getContacts();
+        this.meetingNotes = meetingNotes;
     }
 
     @Override
