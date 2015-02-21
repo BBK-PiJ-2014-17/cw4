@@ -4,8 +4,12 @@ import org.junit.Test;
 
 public class ContactManagerTest {
 
+    private ContactManager cm;
+
     @Before
     public void setUp() throws Exception {
+
+        cm = new ContactManagerImpl();
 
     }
 
