@@ -33,23 +33,35 @@ public class PastMeetingImpl implements PastMeeting {
         this.meetingNotes = meetingNotes;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public String getNotes() {
-        return null;
+        return meetingNotes;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public int getId() {
-        return 0;
+        return meetingId;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public Calendar getDate() {
-        return null;
+        return meetingDate;
     }
 
+    /** {@inheritDoc}
+     *
+     */
     @Override
     public Set<Contact> getContacts() {
-        return null;
+        return meetingContacts;
     }
 }
