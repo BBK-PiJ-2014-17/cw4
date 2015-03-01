@@ -18,12 +18,21 @@ public class ContactManagerTest {
     public void setUp() throws Exception {
 
         // general contacts set
+
+        Contact basil = new ContactImpl("Basil Mason");
+        Contact rebecca = new ContactImpl("Rebecca White");
+
         contacts = new HashSet<Contact>();
-        contacts.add(new ContactImpl(1, "Basil Mason"));
-        contacts.add(new ContactImpl(2, "Rebecca White"));
+        contacts.add(basil);
+        contacts.add(rebecca);
 
         // contact manager
         contactManager = new ContactManagerImpl();
+
+        // add contacts to contact manager for testing
+
+        contactManager.addNewContact(basil.getName(), "");
+        contactManager.addNewContact(rebecca.getName(), "");
 
     }
 
@@ -66,10 +75,12 @@ public class ContactManagerTest {
     @Test
     public void testAddFutureMeetingThrowsExceptionIfPastMeeting() {
 
+        // create past meeting
         Calendar past = Calendar.getInstance();
-        past.add(Calendar.DAY_OF_MONTH, -1);   // past meeting
+        past.add(Calendar.DAY_OF_MONTH, -1);
         //FutureMeeting pastMeeting = new FutureMeetingImpl(past,contacts);
 
+        // expect invalid argument exception due to meeting in past
         thrown.expect(IllegalArgumentException.class);
         contactManager.addFutureMeeting(contacts, past);
 
@@ -82,10 +93,18 @@ public class ContactManagerTest {
     @Test
     public void testAddFutureMeetingThrowsExceptionInvalidContacts() {
 
+        // create past meeting
         Calendar past = Calendar.getInstance();
-        past.add(Calendar.DAY_OF_MONTH, -1);   // past meeting
+        past.add(Calendar.DAY_OF_MONTH, -1);
         FutureMeeting pastMeeting = new FutureMeetingImpl(past,contacts);
 
+        // create contact unknown to contactManager
+        Contact unknown = new ContactImpl("Anon");
+        contacts.add(unknown);
+
+        // expect invalid argument due to unknown contact
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.addFutureMeeting(contacts, past);
 
     }
 
