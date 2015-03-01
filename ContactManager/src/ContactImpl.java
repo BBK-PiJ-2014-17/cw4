@@ -8,8 +8,17 @@ public class ContactImpl implements Contact {
     // class variables
     private int contactId;
     private String contactName, contactNotes;
+    public static int UNIQUE_ID = 0;
 
     // constructors
+
+    public ContactImpl(String contactName) {
+
+        UNIQUE_ID++;
+
+        this(UNIQUE_ID, contactName);
+
+    }
 
     public ContactImpl(int contactId, String contactName) {
 
