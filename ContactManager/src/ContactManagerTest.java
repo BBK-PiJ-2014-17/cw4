@@ -3,6 +3,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
@@ -13,6 +15,7 @@ public class ContactManagerTest {
 
     private ContactManager contactManager;
     private Set<Contact> contacts;
+    private Calendar past, future;
 
     @Before
     public void setUp() throws Exception {
@@ -25,6 +28,14 @@ public class ContactManagerTest {
         contacts = new HashSet<Contact>();
         contacts.add(basil);
         contacts.add(rebecca);
+
+        // dates for testing
+
+        past = Calendar.getInstance();
+        past.add(Calendar.DAY_OF_MONTH, -1);   // past meeting
+
+        future = Calendar.getInstance();
+        future.add(Calendar.DAY_OF_MONTH, +1);   // future meeting
 
         // contact manager
         contactManager = new ContactManagerImpl();
@@ -45,7 +56,7 @@ public class ContactManagerTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    // addFutureMeeting Tests * 3
+    // addFutureMeeting Tests
 
     /**
      * Test addFutureMeeting method of ContactManager
@@ -54,9 +65,6 @@ public class ContactManagerTest {
     @Test
     public void testAddFutureMeeting() throws Exception {
 
-        Calendar future = Calendar.getInstance();
-        future.add(Calendar.DAY_OF_MONTH, +1);   // future meeting
-        //FutureMeeting futureMeeting = new FutureMeetingImpl(future, contacts);
         int m1 = contactManager.addFutureMeeting(contacts, future);
 
         future.add(Calendar.DAY_OF_MONTH, +1);   // change meeting date
@@ -75,11 +83,6 @@ public class ContactManagerTest {
     @Test
     public void testAddFutureMeetingThrowsExceptionIfPastMeeting() {
 
-        // create past meeting
-        Calendar past = Calendar.getInstance();
-        past.add(Calendar.DAY_OF_MONTH, -1);
-        //FutureMeeting pastMeeting = new FutureMeetingImpl(past,contacts);
-
         // expect invalid argument exception due to meeting in past
         thrown.expect(IllegalArgumentException.class);
         contactManager.addFutureMeeting(contacts, past);
@@ -93,11 +96,6 @@ public class ContactManagerTest {
     @Test
     public void testAddFutureMeetingThrowsExceptionInvalidContacts() {
 
-        // create past meeting
-        Calendar past = Calendar.getInstance();
-        past.add(Calendar.DAY_OF_MONTH, -1);
-        FutureMeeting pastMeeting = new FutureMeetingImpl(past,contacts);
-
         // create contact unknown to contactManager
         Contact unknown = new ContactImpl("Anon");
         contacts.add(unknown);
@@ -110,8 +108,53 @@ public class ContactManagerTest {
 
     // getPastMeeting
 
+    /**
+     * Test getPastMeeting method of ContactManager
+     * Check PastMeeting returned with expected ID
+     * Check null returned if no meeting found
+     */
     @Test
     public void testGetPastMeeting() throws Exception {
+
+        boolean wait = true;
+
+        // create meeting 10 seconds in future and get ID
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+        int pastMeetingID = contactManager.addFutureMeeting(contacts, soon);
+
+        while(wait) {   // wait until meeting is in the past
+
+            Calendar now = Calendar.getInstance();
+
+            if (now.compareTo(soon) > 0)
+                wait = false;
+
+        }
+
+        PastMeeting pm = contactManager.getPastMeeting(pastMeetingID);
+
+        // test IDs the same
+        assertEquals(pastMeetingID, pm.getId());
+
+        // test null returned if meeting does not exist
+        assertTrue(contactManager.getPastMeeting(99999) == null);
+
+    }
+
+    /**
+     * Test getPastMeeting method of ContactManager
+     * Check IllegalArgumentException thrown if there is a meeting with that ID happening in the future
+     */
+    @Test
+    public void testGetPastMeetingThrowsExceptionIfFutureMeeting() {
+
+        // add future meeting and get ID
+        int futureMeetingId = contactManager.addFutureMeeting(contacts, future);
+
+        // expect invalid argument exception due to meeting in future
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.getPastMeeting(futureMeetingId);
 
     }
 
