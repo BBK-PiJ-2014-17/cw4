@@ -257,8 +257,15 @@ public class ContactManagerTest {
 
     // getFutureMeetingList
 
+    /**
+     * Test getFutureMeetingList method of ContactManager given contact
+     * Check list is empty if no meetings present with that contact
+     * Check list contains all meetings expected with given contact
+     * Add past meetings to check?
+     * Check for chronology?
+     */
     @Test
-    public void testGetFutureMeetingList() throws Exception {
+    public void testGetFutureMeetingListByContact() throws Exception {
 
         Contact unknown = new ContactImpl("Anon");  // contact without any meetings
 
@@ -275,7 +282,7 @@ public class ContactManagerTest {
         // add meeting without basil
         future.add(Calendar.DAY_OF_MONTH, +1);
         Set<Contact> otherContacts = new HashSet<Contact>();
-        contacts.add(unknown);
+        otherContacts.add(unknown);
         int meeting4Id = contactManager.addFutureMeeting(otherContacts, future);
 
         // get meetings
@@ -311,8 +318,63 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * Test getFutureMeetingList method of ContactManager given date
+     * Check list is empty if no meetings present with that date
+     * Check list contains all meetings expected with given date
+     * Add past meetings to check?
+     * Check for chronology?
+     */
     @Test
-    public void testGetFutureMeetingList1() throws Exception {
+    public void testGetFutureMeetingListByDate() throws Exception {
+
+        // expect empty list
+        assertTrue(contactManager.getFutureMeetingList(future).size() == 0);
+
+        // add meetings with future date
+        Set<Contact> otherContacts1 = new HashSet<Contact>();
+        otherContacts1.add(new ContactImpl("Contact One"));
+        otherContacts1.add(new ContactImpl("Contact Two"));
+        int meeting1Id = contactManager.addFutureMeeting(otherContacts1, future);
+        Set<Contact> otherContacts2 = new HashSet<Contact>();
+        otherContacts2.add(new ContactImpl("Contact Three"));
+        otherContacts2.add(new ContactImpl("Contact Four"));
+        otherContacts2.add(new ContactImpl("Contact Five"));
+        int meeting2Id = contactManager.addFutureMeeting(otherContacts2, future);
+
+        // add meeting on different date
+        Calendar otherDate = Calendar.getInstance();
+        otherDate.add(Calendar.DAY_OF_MONTH, +100);
+        int meeting3Id = contactManager.addFutureMeeting(otherContacts2, otherDate);
+
+        // get meetings
+        List<Meeting> meetings = contactManager.getFutureMeetingList(future);
+
+        // check list contains expected meetings
+        Meeting meeting1 = contactManager.getMeeting(meeting1Id);
+        Meeting meeting2 = contactManager.getMeeting(meeting2Id);
+
+        Set<Meeting> expectedMeetings = new HashSet<Meeting>();
+        expectedMeetings.add(meeting1);
+        expectedMeetings.add(meeting2);
+
+        Set<Matcher<Meeting>> matcher = new HashSet<Matcher<Meeting>>();
+
+        // create a matcher that checks for the property values of each Meeting
+        for(Meeting m: expectedMeetings)
+            matcher.add(new SamePropertyValuesAs(m));
+
+        // check that each matcher matches something in the list
+        for (Matcher<Meeting> mf : matcher)
+            assertThat(meetings, hasItem(mf));
+
+        // check that list sizes match
+        assertThat(meetings, IsCollectionWithSize.hasSize(expectedMeetings.size()));
+
+        // check list does not contain meeting on different date
+        Meeting meeting3 = contactManager.getMeeting(meeting3Id);
+
+        assertThat(meetings,not(hasItem(meeting3)));
 
     }
 
