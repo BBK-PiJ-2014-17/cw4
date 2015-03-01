@@ -121,21 +121,21 @@ public class ContactManagerTest {
         // create meeting 10 seconds in future and get ID
         Calendar soon = Calendar.getInstance();
         soon.add(Calendar.SECOND, +10);   // increase 10 seconds
-        int pastMeetingID = contactManager.addFutureMeeting(contacts, soon);
+        int pastMeetingId = contactManager.addFutureMeeting(contacts, soon);
 
         while(wait) {   // wait until meeting is in the past
 
             Calendar now = Calendar.getInstance();
 
-            if (now.compareTo(soon) > 0)
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
                 wait = false;
 
         }
 
-        PastMeeting pm = contactManager.getPastMeeting(pastMeetingID);
+        PastMeeting pm = contactManager.getPastMeeting(pastMeetingId);
 
         // test IDs the same
-        assertEquals(pastMeetingID, pm.getId());
+        assertEquals(pastMeetingId, pm.getId());
 
         // test null returned if meeting does not exist
         assertTrue(contactManager.getPastMeeting(99999) == null);
@@ -158,8 +158,53 @@ public class ContactManagerTest {
 
     }
 
+    // getFutureMeeting
+
+    /**
+     * Test getFutureMeeting method of ContactManager
+     * Check FutureMeeting returned with expected ID
+     * Check null returned if no meeting found
+     */
     @Test
     public void testGetFutureMeeting() throws Exception {
+
+        // add future meeting and get ID
+        int futureMeetingId = contactManager.addFutureMeeting(contacts, future);
+
+        // test IDs the same
+        assertEquals(futureMeetingId, contactManager.getFutureMeeting(futureMeetingId).getId());
+
+        // test null returned if meeting does not exist
+        assertTrue(contactManager.getFutureMeeting(99999) == null);
+
+    }
+
+    /**
+     * Test getFutureMeeting method of ContactManager
+     * Check IllegalArgumentException thrown if there is a meeting with that ID happening in the past
+     */
+    @Test
+    public void testGetFutureMeetingThrowsExceptionIfPastMeeting() {
+
+        boolean wait = true;
+
+        // create meeting 10 seconds in future and get ID
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+        int futureMeetingId = contactManager.addFutureMeeting(contacts, soon);
+
+        while(wait) {   // wait until meeting is in the past
+
+            Calendar now = Calendar.getInstance();
+
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
+                wait = false;
+
+        }
+
+        // expect invalid argument exception due to meeting in past
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.getFutureMeeting(futureMeetingId);
 
     }
 
