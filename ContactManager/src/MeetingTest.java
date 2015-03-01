@@ -17,7 +17,7 @@ import static org.junit.Assert.assertTrue;
 
 public class MeetingTest {
 
-    private Meeting m;
+    private Meeting m, mUnique1, mUnique2;
     private int expectedId;
     private Calendar expectedDate;
     private Set<Contact> expectedContacts;
@@ -32,7 +32,8 @@ public class MeetingTest {
         expectedContacts.add(new ContactImpl(2, "Rebecca White"));
 
         m = new MeetingImpl(expectedId, expectedDate, expectedContacts);
-
+        mUnique1 = new MeetingImpl(expectedDate, expectedContacts);
+        mUnique2 = new MeetingImpl(expectedDate, expectedContacts);
     }
 
     @After
@@ -44,6 +45,7 @@ public class MeetingTest {
     public void testGetId() throws Exception {
 
         assertEquals(expectedId, m.getId());
+        assertTrue(mUnique1.getId() != mUnique2.getId());
 
     }
 
