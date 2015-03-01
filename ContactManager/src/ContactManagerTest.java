@@ -319,10 +319,26 @@ public class ContactManagerTest {
     }
 
     /**
+     * Test getFutureMeetingList method of ContactManager given contact
+     * Check IllegalArgumentException thrown if invalid contacts
+     */
+    @Test
+    public void testGetFutureMeetingListByContactThrowsExceptionInvalidContacts() {
+
+        // create contact unknown to contactManager
+        Contact unknown = new ContactImpl("Anon");
+
+        // expect invalid argument due to unknown contact
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.getFutureMeetingList(unknown);
+
+    }
+
+    /**
      * Test getFutureMeetingList method of ContactManager given date
      * Check list is empty if no meetings present with that date
      * Check list contains all meetings expected with given date
-     * Add past meetings to check?
+     * Check if contains past meeting
      * Check for chronology?
      */
     @Test
@@ -377,6 +393,8 @@ public class ContactManagerTest {
         assertThat(meetings,not(hasItem(meeting3)));
 
     }
+
+
 
     @Test
     public void testGetPastMeetingList() throws Exception {
