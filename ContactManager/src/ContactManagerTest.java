@@ -1,19 +1,27 @@
+import org.hamcrest.Matcher;
+import org.hamcrest.beans.SamePropertyValuesAs;
+import org.hamcrest.collection.IsCollectionWithSize;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.util.Calendar;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 public class ContactManagerTest {
 
     private ContactManager contactManager;
+    private Contact basil, rebecca;
     private Set<Contact> contacts;
     private Calendar past, future;
 
@@ -22,8 +30,8 @@ public class ContactManagerTest {
 
         // general contacts set
 
-        Contact basil = new ContactImpl("Basil Mason");
-        Contact rebecca = new ContactImpl("Rebecca White");
+        basil = new ContactImpl("Basil Mason");
+        rebecca = new ContactImpl("Rebecca White");
 
         contacts = new HashSet<Contact>();
         contacts.add(basil);
@@ -247,8 +255,59 @@ public class ContactManagerTest {
 
     }
 
+    // getFutureMeetingList
+
     @Test
     public void testGetFutureMeetingList() throws Exception {
+
+        Contact unknown = new ContactImpl("Anon");  // contact without any meetings
+
+        // expect empty list
+        assertTrue(contactManager.getFutureMeetingList(unknown).size() == 0);
+
+        // add meetings with basil
+        int meeting1Id = contactManager.addFutureMeeting(contacts, future);
+        future.add(Calendar.DAY_OF_MONTH, +1);
+        int meeting2Id = contactManager.addFutureMeeting(contacts, future);
+        future.add(Calendar.DAY_OF_MONTH, +1);
+        int meeting3Id = contactManager.addFutureMeeting(contacts, future);
+
+        // add meeting without basil
+        future.add(Calendar.DAY_OF_MONTH, +1);
+        Set<Contact> otherContacts = new HashSet<Contact>();
+        contacts.add(unknown);
+        int meeting4Id = contactManager.addFutureMeeting(otherContacts, future);
+
+        // get meetings
+        List<Meeting> meetings = contactManager.getFutureMeetingList(basil);
+
+        // check list contains expected meetings
+        Meeting meeting1 = contactManager.getMeeting(meeting1Id);
+        Meeting meeting2 = contactManager.getMeeting(meeting2Id);
+        Meeting meeting3 = contactManager.getMeeting(meeting3Id);
+
+        Set<Meeting> expectedMeetings = new HashSet<Meeting>();
+        expectedMeetings.add(meeting1);
+        expectedMeetings.add(meeting2);
+        expectedMeetings.add(meeting3);
+
+        Set<Matcher<Meeting>> matcher = new HashSet<Matcher<Meeting>>();
+
+        // create a matcher that checks for the property values of each Meeting
+        for(Meeting m: expectedMeetings)
+            matcher.add(new SamePropertyValuesAs(m));
+
+        // check that each matcher matches something in the list
+        for (Matcher<Meeting> mf : matcher)
+            assertThat(meetings, hasItem(mf));
+
+        // check that list sizes match
+        assertThat(meetings, IsCollectionWithSize.hasSize(expectedMeetings.size()));
+
+        // check list does not contain meeting without basil
+        Meeting meeting4 = contactManager.getMeeting(meeting4Id);
+
+        assertThat(meetings,not(hasItem(meeting4)));
 
     }
 
