@@ -15,7 +15,19 @@ public class MeetingImpl implements Meeting {
     private Calendar meetingDate;
     private Set<Contact> meetingContacts;
 
+    public static int UNIQUE_ID = 0;
+
     // constructors
+
+    public MeetingImpl(Calendar meetingDate, Set<Contact> meetingContacts) {
+
+        UNIQUE_ID++;
+
+        this.meetingId = UNIQUE_ID;
+        this.meetingDate = meetingDate;
+        this.meetingContacts = meetingContacts;
+
+    }
 
     public MeetingImpl(int meetingId, Calendar meetingDate, Set<Contact> meetingContacts) {
         this.meetingId = meetingId;
