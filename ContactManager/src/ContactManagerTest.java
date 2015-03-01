@@ -208,8 +208,42 @@ public class ContactManagerTest {
 
     }
 
+    // getMeeting
+
+    /**
+     * Test getMeeting method of ContactManager
+     * Check Meeting returned with expected ID
+     * Check null returned if no meeting found
+     */
     @Test
     public void testGetMeeting() throws Exception {
+
+        boolean wait = true;
+
+        // create meeting 10 seconds in future and get ID
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+
+        // add meeting and get ID
+        int meetingId = contactManager.addFutureMeeting(contacts, soon);
+
+        // test IDs the same for meeting whilst a future meeting
+        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());
+
+        while(wait) {   // wait until meeting is in the past and check again
+
+            Calendar now = Calendar.getInstance();
+
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
+                wait = false;
+
+        }
+
+        // test IDs the same for meeting whilst a past meeting
+        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());
+
+        // test null returned if meeting does not exist
+        assertTrue(contactManager.getMeeting(99999) == null);
 
     }
 
