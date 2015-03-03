@@ -563,6 +563,20 @@ public class ContactManagerTest {
     @Test
     public void testAddNewContact() throws Exception {
 
+        String newContactName = "Mr New Contact";
+        String newContactNotes = "Mr New Contact's notes";
+
+        // add contact
+        contactManager.addNewContact(newContactName, newContactNotes);
+
+        // retrieve all contacts based on name
+        Set<Contact> cs = contactManager.getContacts(newContactName);
+
+        // for each contact, check notes. Only one contact should be present
+        for (Contact c : cs) {
+            assertTrue(c.getNotes().equals(newContactNotes));   // change to lambda?
+        }
+
     }
 
     @Test
@@ -571,7 +585,7 @@ public class ContactManagerTest {
     }
 
     @Test
-    public void testGetContactsByString() throws Exception {
+    public void testGetContactsByName() throws Exception {
 
     }
 
