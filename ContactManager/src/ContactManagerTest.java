@@ -519,6 +519,12 @@ public class ContactManagerTest {
     @Test
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
+        int meetingId = 12345678;
+        String notes = "blah blah.";
+
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.addMeetingNotes(meetingId, notes);
+
     }
 
     @Test
