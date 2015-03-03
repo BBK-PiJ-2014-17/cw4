@@ -530,6 +530,13 @@ public class ContactManagerTest {
     @Test
     public void testAddMeetingNotesThrowsIllegalStateException() {
 
+        // add meeting in future
+        int meetingId = contactManager.addFutureMeeting(contacts, future);
+        String notes = "blah blah.";
+
+        thrown.expect(IllegalStateException.class);
+        contactManager.addMeetingNotes(meetingId, notes);
+
     }
 
     @Test
