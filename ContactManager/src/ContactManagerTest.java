@@ -394,10 +394,81 @@ public class ContactManagerTest {
 
     }
 
+    // getPastMeetingList
 
-
+    /**
+     * Test getPastMeetingList method of ContactManager given contact
+     * Check list is empty if no meetings present with that contact
+     * Check list contains all meetings expected with given contact
+     * Check it contains only past meetings
+     * Check for chronology
+     */
     @Test
     public void testGetPastMeetingList() throws Exception {
+
+        boolean wait = true;
+
+        Contact unknown = new ContactImpl("Anon");  // contact without any meetings
+
+        // expect empty list
+        assertTrue(contactManager.getPastMeetingList(unknown).size() == 0);
+
+        // add meetings with basil]
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);
+        int meeting1Id = contactManager.addFutureMeeting(contacts, soon);
+        soon.add(Calendar.SECOND, +10);
+        int meeting2Id = contactManager.addFutureMeeting(contacts, soon);
+        soon.add(Calendar.SECOND, +10);
+        int meeting3Id = contactManager.addFutureMeeting(contacts, soon);
+
+        // add meeting without basil
+        soon.add(Calendar.SECOND, +10);
+        Set<Contact> otherContacts = new HashSet<Contact>();
+        otherContacts.add(unknown);
+        int meeting4Id = contactManager.addFutureMeeting(otherContacts, soon);
+
+        // wait until meetings are in past
+
+        while(wait) {   // wait until meeting is in the past and check again
+
+            Calendar now = Calendar.getInstance();
+
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
+                wait = false;
+
+        }
+
+        // get meetings
+        List<PastMeeting> meetings = contactManager.getPastMeetingList(basil);
+
+        // check list contains expected meetings
+        PastMeeting meeting1 = (PastMeeting) contactManager.getMeeting(meeting1Id);
+        PastMeeting meeting2 = (PastMeeting) contactManager.getMeeting(meeting2Id);
+        PastMeeting meeting3 = (PastMeeting) contactManager.getMeeting(meeting3Id);
+
+        Set<PastMeeting> expectedMeetings = new HashSet<PastMeeting>();
+        expectedMeetings.add(meeting1);
+        expectedMeetings.add(meeting2);
+        expectedMeetings.add(meeting3);
+
+        Set<Matcher<PastMeeting>> matcher = new HashSet<Matcher<PastMeeting>>();
+
+        // create a matcher that checks for the property values of each Meeting
+        for(PastMeeting m: expectedMeetings)
+            matcher.add(new SamePropertyValuesAs(m));
+
+        // check that each matcher matches something in the list
+        for (Matcher<PastMeeting> mf : matcher)
+            assertThat(meetings, hasItem(mf));
+
+        // check that list sizes match
+        assertThat(meetings, IsCollectionWithSize.hasSize(expectedMeetings.size()));
+
+        // check list does not contain meeting without basil
+        PastMeeting meeting4 = (PastMeeting) contactManager.getMeeting(meeting4Id);
+
+        assertThat(meetings,not(hasItem(meeting4)));
 
     }
 
@@ -406,10 +477,61 @@ public class ContactManagerTest {
 
     }
 
+    // addMeetingNotes
+
+    /**
+     * Test addMeetingNotes adds correct details to correct meeting
+     *
+     */
     @Test
     public void testAddMeetingNotes() throws Exception {
 
+        boolean wait = true;
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);
+
+        // add meeting in future
+        int meetingId = contactManager.addFutureMeeting(contacts, soon);
+        String notes = "blah blah.";
+
+        // add meeting notes
+        contactManager.addMeetingNotes(meetingId, notes);
+
+        PastMeeting pm  = (PastMeeting) contactManager.getMeeting(meetingId); // cast meeting to PastMeeting to access notes
+        assertTrue(pm.getNotes().equals(notes));
+
+        // wait until meetings are in past
+
+        while(wait) {   // wait until meeting is in the past and check again
+
+            Calendar now = Calendar.getInstance();
+
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
+                wait = false;
+
+        }
+
+        pm  = contactManager.getPastMeeting(meetingId);
+        assertTrue(pm.getNotes().equals(notes));
+
     }
+
+    @Test
+    public void testAddMeetingNotesThrowsIllegalArgumentException() {
+
+    }
+
+    @Test
+    public void testAddMeetingNotesThrowsIllegalStateException() {
+
+    }
+
+    @Test
+    public void testAddMeetingNotesThrowsNullPointerException() {
+
+    }
+
+    // addNewContact
 
     @Test
     public void testAddNewContact() throws Exception {
@@ -417,12 +539,12 @@ public class ContactManagerTest {
     }
 
     @Test
-    public void testGetContacts() throws Exception {
+    public void testGetContactsById() throws Exception {
 
     }
 
     @Test
-    public void testGetContacts1() throws Exception {
+    public void testGetContactsByString() throws Exception {
 
     }
 
