@@ -580,6 +580,15 @@ public class ContactManagerTest {
     }
 
     @Test
+    public void testAddNewContactThrowsNullPointerException() {
+
+        thrown.expect(NullPointerException.class);
+        contactManager.addNewContact(null, "Not null");
+        contactManager.addNewContact("Not null", null);
+
+    }
+
+    @Test
     public void testGetContactsById() throws Exception {
 
     }
