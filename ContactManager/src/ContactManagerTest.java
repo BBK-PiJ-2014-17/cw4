@@ -542,6 +542,20 @@ public class ContactManagerTest {
     @Test
     public void testAddMeetingNotesThrowsNullPointerException() {
 
+        Contact finder = new ContactImpl("Finder");  // contact to find past meeting by...
+
+        // add past meeting
+        contactManager.addNewPastMeeting(contacts, past, "blah blah");
+
+        // get past meeting ID
+        List<PastMeeting> pms = contactManager.getPastMeetingList(finder);
+        PastMeeting pm = pms.get(0);
+
+        String newNotes = null;
+
+        thrown.expect(NullPointerException.class);
+        contactManager.addMeetingNotes(pm.getId(), newNotes);
+
     }
 
     // addNewContact
