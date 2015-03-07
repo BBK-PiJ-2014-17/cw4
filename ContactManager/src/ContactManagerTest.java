@@ -105,7 +105,7 @@ public class ContactManagerTest {
 
         // method 1, setup future meeting and wait until it is a past meeting
         // then search by id
-        int pastMeetingId = setupPastMeeting();             // setup meeting in past
+        int pastMeetingId = setupPastMeeting(contacts);     // setup meeting in past
         pm = contactManager.getPastMeeting(pastMeetingId);  // get past meeting by id
         assertEquals(pastMeetingId, pm.getId());            // test IDs the same
 
@@ -371,8 +371,49 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * addNewPastMeeting Tests
+     * Required tests:
+     *      - add new past meeting
+     *      - check meeting added by contact search
+     *      - check for IllegalArgumentException if contact unknown to contact manager
+     *      - check for IllegalArgumentException if contacts empty
+     *      - check for NullPointerException if any input is null
+     */
     @Test
     public void testAddNewPastMeeting() throws Exception {
+
+        String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting
+        PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
+        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
+
+    }
+
+    @Test
+    public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
+
+        contacts.add(unknown);
+        thrown.expect(IllegalArgumentException.class);                // expect illegal argument exception
+        contactManager.addNewPastMeeting(contacts, past, "");         // due to unknown contact
+
+        thrown.expect(IllegalArgumentException.class);                          // expect illegal argument exception
+        contactManager.addNewPastMeeting(new HashSet<Contact>(), past, "");     // due to empty contact collection
+
+    }
+
+    @Test
+    public void testAddNewPastMeetingThrowsNullPointerException() throws Exception {
+
+        thrown.expect(NullPointerException.class);              // expect null pointer exception
+        contactManager.addNewPastMeeting(null, past, "");       // due to null contacts
+
+        thrown.expect(NullPointerException.class);              // expect null pointer exception
+        contactManager.addNewPastMeeting(contacts, null, "");   // due to null date
+
+        thrown.expect(NullPointerException.class);              // expect null pointer exception
+        contactManager.addNewPastMeeting(contacts, past, null); // due to null notes
 
     }
 
