@@ -642,6 +642,16 @@ public class ContactManagerTest {
     }
 
     @Test
+    public void testGetContactsByNameThrowsNullPointerException() throws Exception {
+
+        String sNull = null;
+
+        thrown.expect(NullPointerException.class);
+        contactManager.getContacts(sNull);
+
+    }
+
+    @Test
     public void testFlush() throws Exception {
 
     }
