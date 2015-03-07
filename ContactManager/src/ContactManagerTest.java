@@ -115,11 +115,11 @@ public class ContactManagerTest {
         pm = contactManager.getPastMeeting(pastMeetingId);  // get past meeting by id
         assertEquals(pastMeetingId, pm.getId());            // test IDs the same
 
-        // method 2, setup new past meeting with unique contact to search by
+        // method 2, setup new past meeting directly, with unique contact to search by
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
         contacts.add(finder);                                                   // add finder contact to contacts for meeting
         contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting directly
-        pm = (PastMeeting) contactManager.getPastMeetingList(finder).get(0);    // return the past meeting based on finder contact
+        pm = contactManager.getPastMeetingList(finder).get(0);                  // return the past meeting based on finder contact
         assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
 
         // test null returned if meeting does not exist
@@ -137,12 +137,13 @@ public class ContactManagerTest {
 
     }
 
-    // getFutureMeeting
-
     /**
-     * Test getFutureMeeting method of ContactManager
-     * Check FutureMeeting returned with expected ID
-     * Check null returned if no meeting found
+     * getFutureMeeting Tests
+     * Required tests:
+     *      - get future meeting by id
+     *      - check FutureMeeting returned with expected id
+     *      - check null is returned if no meeting present with that id
+     *      - check for IllegalArgumentException if meeting set in the past
      */
     @Test
     public void testGetFutureMeeting() throws Exception {
@@ -158,32 +159,23 @@ public class ContactManagerTest {
 
     }
 
-    /**
-     * Test getFutureMeeting method of ContactManager
-     * Check IllegalArgumentException thrown if there is a meeting with that ID happening in the past
-     */
     @Test
     public void testGetFutureMeetingThrowsExceptionIfPastMeeting() {
 
-        boolean wait = true;
+        int futureMeetingId;
 
-        // create meeting 10 seconds in future and get ID
-        Calendar soon = Calendar.getInstance();
-        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
-        int futureMeetingId = contactManager.addFutureMeeting(contacts, soon);
+        // method 1, setup future meeting and wait until in past
+        futureMeetingId = setupPastMeeting();               // setup past meeting
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.getFutureMeeting(futureMeetingId);   // due to meeting in past
 
-        while(wait) {   // wait until meeting is in the past
-
-            Calendar now = Calendar.getInstance();
-
-            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
-                wait = false;
-
-        }
-
-        // expect invalid argument exception due to meeting in past
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.getFutureMeeting(futureMeetingId);
+        // method 2, setup new past meeting directly, with unique contact to search by
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
+        PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
+        futureMeetingId = pm.getId();                                           // get id of past meeting
+        thrown.expect(IllegalArgumentException.class);                          // expect invalid argument exception
+        contactManager.getFutureMeeting(futureMeetingId);                       // due to meeting in past
 
     }
 
