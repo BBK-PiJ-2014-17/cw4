@@ -13,10 +13,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 // Utility libraries and methods
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ContactManagerTest {
 
@@ -581,12 +578,36 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * flush Tests
+     * Required tests:
+     *      - check data saved to file
+     */
     @Test
     public void testFlush() throws Exception {
 
+        String contactName = "Test Contact";
+        String contactNotes = "Test Notes";
+
+        int meetingId = contactManager.addFutureMeeting(contacts, future);  // add meeting to contact manager
+        contactManager.addNewContact(contactName, contactNotes);            // add contact to contact manager
+
+        contactManager.flush();     // save contents to file
+
+        ContactManager newContactManager = new ContactManagerImpl();    // create new contact manager with saved file
+
+        assertTrue(newContactManager.getMeeting(meetingId) != null);    // check meeting exists in new contact manager
+
+        Set<Contact> cs = newContactManager.getContacts(contactName);   // get contacts by name
+        assertTrue(cs.size() == 1);     // check contact exists
+
     }
 
-    // internal test methods
+    /**
+     * internal test method to setup meeting that starts in future but turns into past meeting
+     * @param withContacts contacts for meeting
+     * @return id of meeting
+     */
     private int setupPastMeeting(Set<Contact> withContacts) {
 
         boolean wait = true;
@@ -608,6 +629,11 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * internal test method to check chronology of collection of PastMeetings
+     * @param meetings List of meetings to check order on
+     * @return true if list chronologically ordered
+     */
     private boolean checkChronologyOfListPast(List<PastMeeting> meetings) {
 
         // check chronology of given meeting collection
@@ -628,6 +654,11 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * internal test method to check chronology of collection of Meetings
+     * @param meetings List of meetings to check order on
+     * @return true if list chronologically ordered
+     */
     private boolean checkChronologyOfList(List<Meeting> meetings) {
 
         // check chronology of given meeting collection
