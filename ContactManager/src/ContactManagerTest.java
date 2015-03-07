@@ -521,17 +521,20 @@ public class ContactManagerTest {
 
     }
 
-    // getContacts
-
+    /**
+     * getContacts Tests
+     * Required tests:
+     *      - get contacts by name
+     *      - get contacts by ids
+     *      - check for IllegalArgumentException if id does not exist
+     *      - check for NullPointerException if name is null
+     */
     @Test
     public void testGetContactsById() throws Exception {
 
-        Set<Contact> cs = contactManager.getContacts(basil.getId(), rebecca.getId());
-
+        Set<Contact> cs = contactManager.getContacts(basil.getId(), rebecca.getId());       // get two known contacts by id
         for (Contact c : cs) {
-
-            assertTrue(c.getName().equals(basil.getName()) || c.getName().equals(rebecca.getName()));
-
+            assertTrue(c.getName().equals(basil.getName()) || c.getName().equals(rebecca.getName()));   // check id returns name that exists
         }
 
     }
@@ -539,8 +542,8 @@ public class ContactManagerTest {
     @Test
     public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
 
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.getContacts(12345678);
+        thrown.expect(IllegalArgumentException.class);  // expect illegal argument exception
+        contactManager.getContacts(12345678);           // if id does not exist
 
 
     }
@@ -548,39 +551,33 @@ public class ContactManagerTest {
     @Test
     public void testGetContactsByName() throws Exception {
 
-        String contactName = "New Contact";
-
+        String contactName = "New Contact";                 // setup new contacts
         Contact contact1 = new ContactImpl(contactName);
         Contact contact2 = new ContactImpl(contactName);
         Contact contact3 = new ContactImpl(contactName);
 
-        int[] contactIds = {contact1.getId(), contact2.getId(), contact3.getId()};
-        Set<Contact> cs = contactManager.getContacts(contactName);
+        int[] contactIds = {contact1.getId(), contact2.getId(), contact3.getId()};  // array of expected contact ids
+        Set<Contact> cs = contactManager.getContacts(contactName);  // get contacts by name
 
         int count = 0;
-
-        for (Contact c : cs) {
-
+        for (Contact c : cs) {              // for each contact
             for (int id : contactIds) {
-
-                if (c.getId() == id)
+                if (c.getId() == id)        // check id corresponds to an expected id
                     count++;
-
             }
 
         }
 
-        assertTrue(count == 3);
+        assertTrue(count == 3); // count of contacts by name should be 3
 
     }
 
     @Test
     public void testGetContactsByNameThrowsNullPointerException() throws Exception {
 
-        String sNull = null;
-
-        thrown.expect(NullPointerException.class);
-        contactManager.getContacts(sNull);
+        String sNull = null;                        // setup null string
+        thrown.expect(NullPointerException.class);  // expect null pointer exception
+        contactManager.getContacts(sNull);          // due to null input
 
     }
 
