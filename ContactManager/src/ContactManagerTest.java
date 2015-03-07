@@ -482,33 +482,42 @@ public class ContactManagerTest {
 
     }
 
-    // addNewContact
-
+    /**
+     * addNewContact Tests
+     * Required tests:
+     *      - add new contact and check name and notes
+     *      - check for NullPointerException if any input is null
+     */
     @Test
     public void testAddNewContact() throws Exception {
 
-        String newContactName = "Mr New Contact";
+        String newContactName = "Mr New Contact";                           // setup new contact
         String newContactNotes = "Mr New Contact's notes";
-
-        // add contact
-        contactManager.addNewContact(newContactName, newContactNotes);
+        contactManager.addNewContact(newContactName, newContactNotes);      // add new contact
 
         // retrieve all contacts based on name
         Set<Contact> cs = contactManager.getContacts(newContactName);
 
-        // for each contact, check notes. Only one contact should be present
+        int count = 0;
+
+        // for each contact, check notes.
         for (Contact c : cs) {
-            assertTrue(c.getNotes().equals(newContactNotes));   // change to lambda?
+            if (c.getNotes().equals(newContactNotes))   // if notes equal new contact notes, increment count
+                count++;
         }
+
+        assertTrue(count == 1);     // expect 1 contact with new contact notes
 
     }
 
     @Test
     public void testAddNewContactThrowsNullPointerException() {
 
-        thrown.expect(NullPointerException.class);
-        contactManager.addNewContact(null, "Not null");
-        contactManager.addNewContact("Not null", null);
+        thrown.expect(NullPointerException.class);          // expect null pointer exception
+        contactManager.addNewContact(null, "Not null");     // if name is null
+
+        thrown.expect(NullPointerException.class);          // expect null pointer exception
+        contactManager.addNewContact("Not null", null);     // if notes are null
 
     }
 
@@ -580,6 +589,7 @@ public class ContactManagerTest {
 
     }
 
+    // internal test methods
     private int setupPastMeeting(Set<Contact> withContacts) {
 
         boolean wait = true;
