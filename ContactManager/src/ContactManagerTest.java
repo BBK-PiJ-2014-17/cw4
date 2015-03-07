@@ -588,8 +588,23 @@ public class ContactManagerTest {
 
     }
 
+    // getContacts
+
     @Test
     public void testGetContactsById() throws Exception {
+
+        Set<Contact> cs = contactManager.getContacts(basil.getId(), rebecca.getId());
+
+        for (Contact c : cs) {
+
+            assertTrue(c.getName().equals(basil.getName()) || c.getName().equals(rebecca.getName()));
+
+        }
+
+    }
+
+    @Test
+    public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
 
     }
 
