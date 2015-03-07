@@ -615,6 +615,30 @@ public class ContactManagerTest {
     @Test
     public void testGetContactsByName() throws Exception {
 
+        String contactName = "New Contact";
+
+        Contact contact1 = new ContactImpl(contactName);
+        Contact contact2 = new ContactImpl(contactName);
+        Contact contact3 = new ContactImpl(contactName);
+
+        int[] contactIds = {contact1.getId(), contact2.getId(), contact3.getId()};
+        Set<Contact> cs = contactManager.getContacts(contactName);
+
+        int count = 0;
+
+        for (Contact c : cs) {
+
+            for (int id : contactIds) {
+
+                if (c.getId() == id)
+                    count++;
+
+            }
+
+        }
+
+        assertTrue(count == 3);
+
     }
 
     @Test
