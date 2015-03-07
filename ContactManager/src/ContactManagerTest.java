@@ -606,6 +606,10 @@ public class ContactManagerTest {
     @Test
     public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
 
+        thrown.expect(IllegalArgumentException.class);
+        contactManager.getContacts(12345678);
+
+
     }
 
     @Test
