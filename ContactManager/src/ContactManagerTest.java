@@ -179,39 +179,30 @@ public class ContactManagerTest {
 
     }
 
-    // getMeeting
-
     /**
-     * Test getMeeting method of ContactManager
-     * Check Meeting returned with expected ID
-     * Check null returned if no meeting found
+     * getMeeting Tests
+     * Required tests:
+     *      - get meeting by id
+     *      - check meeting returned with expected id
+     *      - check null is returned if no meeting present with that id
+     *      - check it works for past and future meetings
      */
     @Test
     public void testGetMeeting() throws Exception {
 
-        boolean wait = true;
+        int meetingId;
 
-        // create meeting 10 seconds in future and get ID
-        Calendar soon = Calendar.getInstance();
-        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+        meetingId = contactManager.addFutureMeeting(contacts, future);          // future meeting
+        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
 
-        // add meeting and get ID
-        int meetingId = contactManager.addFutureMeeting(contacts, soon);
+        meetingId = setupPastMeeting();                                         // future meeting turned past meeting
+        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
 
-        // test IDs the same for meeting whilst a future meeting
-        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());
-
-        while(wait) {   // wait until meeting is in the past and check again
-
-            Calendar now = Calendar.getInstance();
-
-            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
-                wait = false;
-
-        }
-
-        // test IDs the same for meeting whilst a past meeting
-        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
+        PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // direct past meeting
+        meetingId = pm.getId();                                                 // get id of past meeting
+        assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
 
         // test null returned if meeting does not exist
         assertTrue(contactManager.getMeeting(99999) == null);
