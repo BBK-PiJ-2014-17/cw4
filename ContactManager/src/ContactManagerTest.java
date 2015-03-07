@@ -1,18 +1,18 @@
+// Unit testing libraries and methods
 import org.hamcrest.Matcher;
 import org.hamcrest.beans.SamePropertyValuesAs;
 import org.hamcrest.collection.IsCollectionWithSize;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-
 import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.Matchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
+// Utility libraries and methods
 import java.util.Calendar;
 import java.util.HashSet;
 import java.util.List;
@@ -20,43 +20,38 @@ import java.util.Set;
 
 public class ContactManagerTest {
 
-    private ContactManager contactManager;
-    private Contact basil, rebecca;
-    private Set<Contact> contacts;
-    private Calendar past, future;
+    // set general variables for use in any test
+    private ContactManager contactManager;              // the contact manager object to test
+    private Contact basil, rebecca, unknown, finder;    // individual contacts to test
+    private String finderString;                        // search string to find past meetings by contact
+    private Set<Contact> contacts;                      // a collection of contacts for meetings
+    private Calendar past, future;                      // dates for past and future meetings
 
+    // setup the test variables and environment
     @Before
     public void setUp() throws Exception {
 
-        // general contacts set
+        // setup contacts
+        basil = new ContactImpl("Basil Mason");                 // meeting contact
+        rebecca = new ContactImpl("Rebecca White");             // meeting contact
+        unknown = new ContactImpl("Anon");                      // unknown contact, not added to manager
+        finderString = "Finder";                                // set string to search by
+        finder = new ContactImpl(finderString);                 // setup contact to use in searches
+        contacts = new HashSet<Contact>();                      // collection of contacts for meetings
+        contacts.add(basil);                                    // add contact
+        contacts.add(rebecca);                                  // add contact
 
-        basil = new ContactImpl("Basil Mason");
-        rebecca = new ContactImpl("Rebecca White");
-
-        contacts = new HashSet<Contact>();
-        contacts.add(basil);
-        contacts.add(rebecca);
-
-        // dates for testing
-
+        // setup dates
         past = Calendar.getInstance();
-        past.add(Calendar.DAY_OF_MONTH, -1);   // past meeting
-
+        past.add(Calendar.DAY_OF_MONTH, -1);                    // date for past meeting
         future = Calendar.getInstance();
-        future.add(Calendar.DAY_OF_MONTH, +1);   // future meeting
+        future.add(Calendar.DAY_OF_MONTH, +1);                  // date for future meeting
 
-        // contact manager
+        // setup contact manager
         contactManager = new ContactManagerImpl();
-
-        // add contacts to contact manager for testing
-
-        contactManager.addNewContact(basil.getName(), "");
-        contactManager.addNewContact(rebecca.getName(), "");
-
-    }
-
-    @After
-    public void tearDown() throws Exception {
+        contactManager.addNewContact(basil.getName(), "");      // add contact to contact manager
+        contactManager.addNewContact(rebecca.getName(), "");    // add contact to contact manager
+        contactManager.addNewContact(finder.getName(), "");     // add contact to contact manager
 
     }
 
@@ -64,105 +59,81 @@ public class ContactManagerTest {
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
-    // addFutureMeeting Tests
-
     /**
-     * Test addFutureMeeting method of ContactManager
-     * Check unique ID returned
+     * addFutureMeetings Tests
+     * Required tests:
+     *      - add meeting and return id
+     *      - add multiple meetings and check uniqueness of ids
+     *      - check for IllegalArgumentException if meeting set in the past
+     *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
     @Test
     public void testAddFutureMeeting() throws Exception {
 
-        int m1 = contactManager.addFutureMeeting(contacts, future);
+        int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
+        future.add(Calendar.DAY_OF_MONTH, +1);                      // move meeting date
+        int m2 = contactManager.addFutureMeeting(contacts, future); // add second meeting
 
-        future.add(Calendar.DAY_OF_MONTH, +1);   // change meeting date
-        int m2 = contactManager.addFutureMeeting(contacts, future);
-
-        System.out.println("Meeting 1 ID: " + m1);
-        System.out.println("Meeting 2 ID: " + m2);
-        assertTrue(m1 != m2);
+        assertTrue(m1 != m2);   // check meeting ids are unique
 
     }
 
-    /**
-     * Test addFutureMeeting method of ContactManager
-     * Check IllegalArgumentException thrown if the meeting is set for a time in the past
-     */
     @Test
     public void testAddFutureMeetingThrowsExceptionIfPastMeeting() {
 
-        // expect invalid argument exception due to meeting in past
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.addFutureMeeting(contacts, past);
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.addFutureMeeting(contacts, past);    // due to meeting in past
 
     }
 
-    /**
-     * Test addFutureMeeting method of ContactManager
-     * Check IllegalArgumentException thrown if invalid contacts
-     */
     @Test
     public void testAddFutureMeetingThrowsExceptionInvalidContacts() {
 
-        // create contact unknown to contactManager
-        Contact unknown = new ContactImpl("Anon");
-        contacts.add(unknown);
+        contacts.add(unknown);  // add contact unknown to contact manager to set of contacts for meeting
 
-        // expect invalid argument due to unknown contact
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.addFutureMeeting(contacts, past);
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.addFutureMeeting(contacts, past);    // due to unknown contact
 
     }
 
-    // getPastMeeting
-
     /**
-     * Test getPastMeeting method of ContactManager
-     * Check PastMeeting returned with expected ID
-     * Check null returned if no meeting found
+     * getPastMeeting Tests
+     * Required tests:
+     *      - get past meeting by id
+     *      - check PastMeeting returned with expected id
+     *      - check null is returned if no meeting present with that id
+     *      - check for IllegalArgumentException if meeting set in the future
      */
     @Test
     public void testGetPastMeeting() throws Exception {
 
-        boolean wait = true;
+        PastMeeting pm;
 
-        // create meeting 10 seconds in future and get ID
-        Calendar soon = Calendar.getInstance();
-        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
-        int pastMeetingId = contactManager.addFutureMeeting(contacts, soon);
+        // method 1, setup future meeting and wait until it is a past meeting
+        // then search by id
+        int pastMeetingId = setupPastMeeting();             // setup meeting in past
+        pm = contactManager.getPastMeeting(pastMeetingId);  // get past meeting by id
+        assertEquals(pastMeetingId, pm.getId());            // test IDs the same
 
-        while(wait) {   // wait until meeting is in the past
-
-            Calendar now = Calendar.getInstance();
-
-            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
-                wait = false;
-
-        }
-
-        PastMeeting pm = contactManager.getPastMeeting(pastMeetingId);
-
-        // test IDs the same
-        assertEquals(pastMeetingId, pm.getId());
+        // method 2, setup new past meeting with unique contact to search by
+        String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting directly
+        pm = (PastMeeting) contactManager.getPastMeetingList(finder).get(0);    // return the past meeting based on finder contact
+        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
 
         // test null returned if meeting does not exist
         assertTrue(contactManager.getPastMeeting(99999) == null);
 
     }
 
-    /**
-     * Test getPastMeeting method of ContactManager
-     * Check IllegalArgumentException thrown if there is a meeting with that ID happening in the future
-     */
     @Test
     public void testGetPastMeetingThrowsExceptionIfFutureMeeting() {
 
-        // add future meeting and get ID
-        int futureMeetingId = contactManager.addFutureMeeting(contacts, future);
+        int futureMeetingId = contactManager.addFutureMeeting(contacts, future);    // add future meeting and get ID
 
-        // expect invalid argument exception due to meeting in future
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.getPastMeeting(futureMeetingId);
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.getPastMeeting(futureMeetingId);     // due to meeting in future
 
     }
 
@@ -653,6 +624,27 @@ public class ContactManagerTest {
 
     @Test
     public void testFlush() throws Exception {
+
+    }
+
+    private int setupPastMeeting() {
+
+        boolean wait = true;
+
+        // create meeting 10 seconds in future and get ID
+        Calendar soon = Calendar.getInstance();
+        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+        int pastMeetingId = contactManager.addFutureMeeting(contacts, soon);
+
+        while(wait) {   // wait until meeting is in the past
+
+            Calendar now = Calendar.getInstance();
+            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
+                wait = false;
+
+        }
+
+        return pastMeetingId;
 
     }
 }
