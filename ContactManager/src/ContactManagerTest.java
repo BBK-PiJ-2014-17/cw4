@@ -159,7 +159,7 @@ public class ContactManagerTest {
         int futureMeetingId;
 
         // method 1, setup future meeting and wait until in past
-        futureMeetingId = setupPastMeeting(contacts);               // setup past meeting
+        futureMeetingId = setupPastMeeting(contacts);       // setup past meeting
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
         contactManager.getFutureMeeting(futureMeetingId);   // due to meeting in past
 
@@ -417,53 +417,44 @@ public class ContactManagerTest {
 
     }
 
-    // addMeetingNotes
-
     /**
-     * Test addMeetingNotes adds correct details to correct meeting
-     *
+     * addMeetingNotes Tests
+     * Required tests:
+     *      - add new meeting notes to past meeting
+     *      - check for IllegalArgumentException if meeting does not exist
+     *      - check for IllegalStateException if meeting set in future
+     *      - check for NullPointerException if any notes are null
      */
     @Test
     public void testAddMeetingNotes() throws Exception {
 
-        boolean wait = true;
-        Calendar soon = Calendar.getInstance();
-        soon.add(Calendar.SECOND, +10);
+        PastMeeting pm;
+        String pastMeetingNotes = "blah blah";  // meeting notes to check
 
-        // add meeting in future
-        int meetingId = contactManager.addFutureMeeting(contacts, soon);
-        String notes = "blah blah.";
+        // method 1, setup future meeting and wait until it is a past meeting
+        // then add notes by id
+        int pastMeetingId = setupPastMeeting(contacts);                         // setup future-turned-past meeting
+        pm = contactManager.getPastMeeting(pastMeetingId);                      // get past meeting by id
+        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);           // add notes
+        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
 
-        // add meeting notes
-        contactManager.addMeetingNotes(meetingId, notes);
-
-        PastMeeting pm  = (PastMeeting) contactManager.getMeeting(meetingId); // cast meeting to PastMeeting to access notes
-        assertTrue(pm.getNotes().equals(notes));
-
-        // wait until meetings are in past
-
-        while(wait) {   // wait until meeting is in the past and check again
-
-            Calendar now = Calendar.getInstance();
-
-            if (now.compareTo(soon) > 0)    // if time now is greater than time when meeting occurred
-                wait = false;
-
-        }
-
-        pm  = contactManager.getPastMeeting(meetingId);
-        assertTrue(pm.getNotes().equals(notes));
+        // method 2, setup new past meeting directly, with unique contact to search by
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
+        pm = contactManager.getPastMeetingList(finder).get(0);                  // return the past meeting based on finder contact
+        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);           // add notes
+        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
 
     }
 
     @Test
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
-        int meetingId = 12345678;
+        int meetingId = 12345678;       // meeting id does not exist
         String notes = "blah blah.";
 
-        thrown.expect(IllegalArgumentException.class);
-        contactManager.addMeetingNotes(meetingId, notes);
+        thrown.expect(IllegalArgumentException.class);      // expect illegal argument exception
+        contactManager.addMeetingNotes(meetingId, notes);   // due to non-existent meeting
 
     }
 
@@ -474,27 +465,20 @@ public class ContactManagerTest {
         int meetingId = contactManager.addFutureMeeting(contacts, future);
         String notes = "blah blah.";
 
-        thrown.expect(IllegalStateException.class);
-        contactManager.addMeetingNotes(meetingId, notes);
+        thrown.expect(IllegalStateException.class);         // expect illegal state exception
+        contactManager.addMeetingNotes(meetingId, notes);   // due to meeting in future
 
     }
 
     @Test
     public void testAddMeetingNotesThrowsNullPointerException() {
 
-        Contact finder = new ContactImpl("Finder");  // contact to find past meeting by...
+        contacts.add(finder);                                                   // add finder contact to contacts for meeting
+        contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
+        PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
 
-        // add past meeting
-        contactManager.addNewPastMeeting(contacts, past, "blah blah");
-
-        // get past meeting ID
-        List<PastMeeting> pms = contactManager.getPastMeetingList(finder);
-        PastMeeting pm = pms.get(0);
-
-        String newNotes = null;
-
-        thrown.expect(NullPointerException.class);
-        contactManager.addMeetingNotes(pm.getId(), newNotes);
+        thrown.expect(NullPointerException.class);          // expect null point exception
+        contactManager.addMeetingNotes(pm.getId(), null);   // when notes are null
 
     }
 
