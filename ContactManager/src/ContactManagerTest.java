@@ -11,6 +11,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 // Utility libraries and methods
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 public class ContactManagerTest {
@@ -61,14 +62,11 @@ public class ContactManagerTest {
             finder = c;
         }*/
 
-
         // setup dates
         past = Calendar.getInstance();
         past.add(Calendar.DAY_OF_MONTH, -1);                    // date for past meeting
         future = Calendar.getInstance();
         future.add(Calendar.DAY_OF_MONTH, +1);                  // date for future meeting
-
-
 
     }
 
@@ -91,7 +89,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if meeting set in the past
      *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
-    @Ignore
+    @Ignore           // TESTED
     public void testAddFutureMeeting() throws Exception {
 
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
@@ -102,7 +100,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Ignore           // TESTED
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -122,11 +120,10 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the future
      */
-    @Ignore
+    @Ignore           // TESTED
     public void testGetPastMeeting() throws Exception {
 
         PastMeeting pm;
-
         int pastMeetingId;
 
         // method 1, setup future meeting and wait until it is a past meeting
@@ -135,17 +132,19 @@ public class ContactManagerTest {
         pm = contactManager.getPastMeeting(pastMeetingId);  // get past meeting by id
         assertEquals(pastMeetingId, pm.getId());            // test IDs the same
 
-
         // method 2, setup new past meeting directly, with unique contact to search by
-        for (Contact c : contactManager.getContacts(finderString)) {
-            contacts.add(c);
-            finder = c;
-        }
 
-        String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
-        //contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting directly
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+        int c1 = generateUniqueContactForMeetings(n1);
+        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];
 
-        List<PastMeeting> pms = contactManager.getPastMeetingList(finder);
+        Set<Contact> cs = new HashSet<Contact>();
+        cs.add(c);
+
+        contactManager.addNewPastMeeting(cs, past, n1);
+
+        List<PastMeeting> pms = contactManager.getPastMeetingList(c);
 
         for (PastMeeting m : pms) {
 
@@ -153,7 +152,7 @@ public class ContactManagerTest {
 
             System.out.println(notes);
 
-            //assertTrue(pastMeetingNotes.equals(notes));
+            assertTrue(n1.equals(notes));
         }
 
         // test null returned if meeting does not exist
@@ -161,7 +160,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Ignore           // TESTED
     public void testGetPastMeetingThrowsIllegalArgumentException() {
 
         int futureMeetingId = contactManager.addFutureMeeting(contacts, future);    // add future meeting and get ID
@@ -179,7 +178,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the past
      */
-    @Ignore
+    @Ignore           // TESTED
     public void testGetFutureMeeting() throws Exception {
 
         // add future meeting and get ID
@@ -193,7 +192,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Test
     public void testGetFutureMeetingThrowsIllegalArgumentException() {
 
         int futureMeetingId;
@@ -210,6 +209,25 @@ public class ContactManagerTest {
         //futureMeetingId = pm.getId();                                           // get id of past meeting
         //thrown.expect(IllegalArgumentException.class);                          // expect invalid argument exception
         //contactManager.getFutureMeeting(futureMeetingId);                       // due to meeting in past
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+        int c1 = generateUniqueContactForMeetings(n1);
+        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];
+
+        Set<Contact> cs = new HashSet<Contact>();
+        cs.add(c);
+
+        contactManager.addNewPastMeeting(cs, past, n1);
+
+        List<PastMeeting> pms = contactManager.getPastMeetingList(c);
+
+        for (PastMeeting m : pms) {
+
+            futureMeetingId = m.getId();                                           // get id of past meeting
+            thrown.expect(IllegalArgumentException.class);                          // expect invalid argument exception
+            contactManager.getFutureMeeting(futureMeetingId);                       // due to meeting in past
+        }
 
     }
 
@@ -305,7 +323,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore
     public void testGetFutureMeetingListByContactThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -734,6 +752,24 @@ public class ContactManagerTest {
 
         return before;
 
+    }
+
+    private int generateUniqueContactForMeetings(String notes) {
+
+        String name = "DEFAULT";
+        contactManager.addNewContact(name, notes);
+        int ret = 0;
+
+        Set<Contact> cs = contactManager.getContacts(name);
+
+        for (Contact c : cs) {
+
+            if (c.getNotes().equals(notes))
+                ret = c.getId();
+
+        }
+
+        return ret;
     }
 
 }
