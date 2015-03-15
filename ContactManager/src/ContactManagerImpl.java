@@ -292,6 +292,8 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public void addNewContact(String name, String notes) {
 
+        contacts.add(new ContactImpl(uniqueId(), name, notes));
+
     }
 
     @Override
