@@ -56,8 +56,11 @@ public class ContactManagerTest {
         for (Contact c : contactManager.getContacts(rebeccaString))
             contacts.add(c);
 
-        for (Contact c : contactManager.getContacts(finderString))
+        for (Contact c : contactManager.getContacts(finderString)) {
             contacts.add(c);
+            finder = c;
+        }
+
 
         // setup dates
         past = Calendar.getInstance();
@@ -405,7 +408,6 @@ public class ContactManagerTest {
     public void testAddNewPastMeeting() throws Exception {
 
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
-        contacts.add(finder);                                                   // add finder contact to contacts for meeting
         contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting
         PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
         assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match

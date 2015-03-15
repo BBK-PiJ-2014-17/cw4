@@ -58,7 +58,7 @@ public class ContactManagerImpl implements ContactManager {
     public ContactManagerImpl() {
 
         File contactsXml = new File(filePath);                      // set xml file path
-        NodeList managerNodes, contactNodes, meetingNodes, meetingContactNodes;   // node lists for xml read
+        NodeList root, managerNodes, contactNodes, meetingNodes, meetingContactNodes;   // node lists for xml read
         DocumentBuilderFactory dbFactory;                           // for xml output
         DocumentBuilder dBuilder;                                   // for xml output
         Document doc;                                               // for xml output
@@ -79,6 +79,10 @@ public class ContactManagerImpl implements ContactManager {
                 dBuilder = dbFactory.newDocumentBuilder();          // setup xml read
                 doc = dBuilder.parse(contactsXml);                  // read in file
                 doc.getDocumentElement().normalize();               // normalise xml
+
+                // start at root
+
+                //root = doc.getElementsByTagName("contactManager");
 
                 // read in current unique ID
 
@@ -113,11 +117,11 @@ public class ContactManagerImpl implements ContactManager {
 
                 for (int i = 0; i < meetingNodes.getLength(); i++) {    // read each node into meeting list
 
-                    Node nNode = meetingNodes.item(i);      // current node
+                    Node nMeeting = meetingNodes.item(i);      // current node
 
-                    if (nNode.getNodeType() == Node.ELEMENT_NODE) {     // read only element type nodes
+                    if (nMeeting.getNodeType() == Node.ELEMENT_NODE) {     // read only element type nodes
 
-                        Element eElement = (Element) nNode; // current element node
+                        Element eElement = (Element) nMeeting; // current element node
 
                         // meeting date from file as calendar object
 
@@ -126,14 +130,14 @@ public class ContactManagerImpl implements ContactManager {
                         meetingDate.setTime(xmlDate);                   // initialise calendar object with date from file
 
                         // meeting contacts collection from file
-
                         Set<Contact> meetingContacts = new HashSet<Contact>();  // set for current meeting
 
-                        meetingContactNodes = doc.getElementsByTagName("meetingContact");  // get list of meeting contact nodes
+                        Element mcs = (Element) eElement.getElementsByTagName("meetingContacts").item(0);
+                        meetingContactNodes = mcs.getElementsByTagName("meetingContact");  // get list of meeting contact nodes
 
                         for (int j = 0; j < meetingContactNodes.getLength(); j++) {     // read each node into current meeting contact set
 
-                            Node nMeetingContactNode = meetingContactNodes.item(i);             // current node
+                            Node nMeetingContactNode = meetingContactNodes.item(j);             // current node
 
                             if (nMeetingContactNode.getNodeType() == Node.ELEMENT_NODE) {       // read only element type nodes
 
