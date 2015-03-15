@@ -178,11 +178,11 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     @Override
-    public int addFutureMeeting(Set<Contact> meetingContacts, Calendar date) {
+    public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
 
         int id = uniqueId();
 
-        FutureMeeting fm = new FutureMeetingImpl(id, date, meetingContacts);
+        FutureMeeting fm = new FutureMeetingImpl(id, date, contacts);
         meetings.add(fm);
 
         return id;
@@ -271,7 +271,20 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public List<Meeting> getFutureMeetingList(Calendar date) {
-        return null;
+
+        List<Meeting> ret = new ArrayList<Meeting>();
+
+        for (Object o : meetings) {
+
+            Meeting m = (Meeting) o;
+
+            if (m.getDate().compareTo(date) == 0)
+                ret.add(m);
+
+        }
+
+        return ret;
+
     }
 
     @Override
@@ -281,6 +294,26 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text) {
+
+        if (contacts == null || date == null || text == null)
+            throw new IllegalArgumentException();
+
+        if (contacts.isEmpty())
+            throw new IllegalArgumentException();
+
+        boolean exists = true;
+
+        for (Contact c : contacts) {
+
+            if (!this.contacts.contains(c))
+                exists = false;
+
+        }
+
+        if (!exists)
+            throw new IllegalArgumentException();
+
+        this.meetings.add(new PastMeetingImpl(uniqueId(), date, contacts, text));
 
     }
 
@@ -525,6 +558,37 @@ public class ContactManagerImpl implements ContactManager {
     private int uniqueId() {
         CM_ID++;
         return CM_ID;
+    }
+
+    private void sortMeetings() {
+
+        /*
+
+        Set<? super Meeting> sortedMeetings = new HashSet<Meeting>();
+
+        while(!this.meetings.isEmpty()) {
+
+
+
+        }
+
+        for (Object o : this.meetings) {
+
+            Meeting m = (Meeting) o;
+
+
+
+        }
+
+        Comparator<? super Meeting> comp = new Comparator<Meeting>() {
+            @Override
+            public int compare(Meeting o1, Meeting o2) {
+                return o1.getDate().compareTo(o2.getDate());
+            }
+        };
+
+        Collections.sort(meetings, comp);  */
+
     }
 
 }
