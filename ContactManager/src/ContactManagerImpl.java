@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-
+import java.util.concurrent.FutureTask;
 
 
 /**
@@ -220,6 +220,8 @@ public class ContactManagerImpl implements ContactManager {
 
         PastMeeting ret = null;
 
+        updateMeetingTypes();   // update any future meetings
+
         for (Object m : meetings) {
 
             if (m instanceof PastMeeting) {
@@ -241,6 +243,8 @@ public class ContactManagerImpl implements ContactManager {
 
         FutureMeeting ret = null;
 
+        updateMeetingTypes();   // update any future meetings
+
         for (Object m : meetings) {
 
             if (m instanceof FutureMeeting) {
@@ -261,6 +265,8 @@ public class ContactManagerImpl implements ContactManager {
     public Meeting getMeeting(int id) {
 
         Meeting ret = null, m;
+
+        updateMeetingTypes();   // update any future meetings
 
         for (Object o : meetings) {
 
@@ -303,6 +309,8 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public List<Meeting> getFutureMeetingList(Calendar date) {
 
+        updateMeetingTypes();   // update any future meetings
+
         List<Meeting> ret = new ArrayList<Meeting>();
 
         for (Object o : meetings) {
@@ -320,6 +328,8 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public List<PastMeeting> getPastMeetingList(Contact contact) {
+
+        updateMeetingTypes();   // update any future meetings
 
         List<PastMeeting> ret = new ArrayList<PastMeeting>();
 
@@ -652,4 +662,25 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    private void updateMeetingTypes() {
+
+        for (Object m : meetings) {
+
+            if (m instanceof FutureMeeting) {
+
+                FutureMeeting fm = (FutureMeeting) m;
+
+                Calendar now = Calendar.getInstance();
+                if (now.compareTo(fm.getDate()) > 0) {
+
+                    meetings.add(new PastMeetingImpl(fm, ""));
+                    meetings.remove(fm);
+
+                }
+
+            }
+
+        }
+
+    }
 }

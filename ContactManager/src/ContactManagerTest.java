@@ -100,7 +100,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the future
      */
-    @Ignore
+    @Test
     public void testGetPastMeeting() throws Exception {
 
         PastMeeting pm;
