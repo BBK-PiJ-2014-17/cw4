@@ -254,13 +254,17 @@ public class ContactManagerImpl implements ContactManager {
 
         for (Object o : meetings) {
 
-            Meeting m = (Meeting) o;
-            Set<Contact> cs = m.getContacts();
+            if (o instanceof FutureMeeting) {
 
-            for (Contact c : cs) {
+                Meeting m = (Meeting) o;
+                Set<Contact> cs = m.getContacts();
 
-                if (contact.getId() == c.getId())
-                    ret.add(m);
+                for (Contact c : cs) {
+
+                    if (contact.getId() == c.getId())
+                        ret.add(m);
+
+                }
 
             }
 
@@ -289,7 +293,29 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public List<PastMeeting> getPastMeetingList(Contact contact) {
-        return null;
+
+        List<PastMeeting> ret = new ArrayList<PastMeeting>();
+
+        for (Object o : meetings) {
+
+            if (o instanceof PastMeeting) {
+
+                PastMeeting m = (PastMeeting) o;
+                Set<Contact> cs = m.getContacts();
+
+                for (Contact c : cs) {
+
+                    if (contact.getId() == c.getId())
+                        ret.add(m);
+
+                }
+
+            }
+
+        }
+
+        return ret;
+
     }
 
     @Override
