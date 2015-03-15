@@ -91,7 +91,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if meeting set in the past
      *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
-    @Test
+    @Ignore
     public void testAddFutureMeeting() throws Exception {
 
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
@@ -102,7 +102,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -404,13 +404,27 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if contacts empty
      *      - check for NullPointerException if any input is null
      */
-    @Ignore
+    @Test
     public void testAddNewPastMeeting() throws Exception {
 
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
         contactManager.addNewPastMeeting(contacts, past, pastMeetingNotes);     // add new past meeting
-        PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
-        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
+
+        List<PastMeeting> pms = contactManager.getPastMeetingList(finder);
+
+        for (PastMeeting pm : pms) {
+
+            String notes = pm.getNotes();
+
+            System.out.println(notes);
+
+            //assertEquals(pastMeetingNotes, notes);
+
+            assertTrue(pastMeetingNotes.equals(notes));
+        }
+
+        //PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
+        //assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
 
     }
 

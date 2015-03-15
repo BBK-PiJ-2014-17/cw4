@@ -129,6 +129,10 @@ public class ContactManagerImpl implements ContactManager {
                         Calendar meetingDate = Calendar.getInstance();  // create calendar object
                         meetingDate.setTime(xmlDate);                   // initialise calendar object with date from file
 
+                        // meeting notes
+
+                        String meetingNotes = eElement.getElementsByTagName("notes").item(0).getTextContent();
+
                         // meeting contacts collection from file
                         Set<Contact> meetingContacts = new HashSet<Contact>();  // set for current meeting
 
@@ -159,7 +163,7 @@ public class ContactManagerImpl implements ContactManager {
                             PastMeeting m = new PastMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
                                     meetingDate,
                                     meetingContacts,
-                                    "");
+                                    meetingNotes);
 
                             meetings.add(m);
 
