@@ -18,7 +18,7 @@ public class ContactManagerTest {
     // set general variables for use in any test
     private ContactManager contactManager;              // the contact manager object to test
     private Contact basil, rebecca, unknown, finder;    // individual contacts to test
-    private String finderString;                        // search string to find past meetings by contact
+    private String basilString, rebeccaString, unknownString, finderString;                        // search string to find past meetings by contact
     private Set<Contact> contacts;                      // a collection of contacts for meetings
     private Calendar past, future;                      // dates for past and future meetings
 
@@ -26,15 +26,38 @@ public class ContactManagerTest {
     @Before
     public void setUp() throws Exception {
 
+        basilString = "Basil Mason";
+        rebeccaString = "Rebecca White";
+        unknownString = "Anon";
+        finderString = "Finder";
+
+        // setup contact manager
+        contactManager = new ContactManagerImpl();
+        //contactManager.addNewContact(basil.getName(), "");      // add contact to contact manager
+        //contactManager.addNewContact(rebecca.getName(), "");    // add contact to contact manager
+        //contactManager.addNewContact(finder.getName(), "");     // add contact to contact manager
+        contactManager.addNewContact(basilString, "");
+        contactManager.addNewContact(rebeccaString, "");
+        contactManager.addNewContact(finderString, "");
+
         // setup contacts
-        basil = new ContactImpl("Basil Mason");                 // meeting contact
-        rebecca = new ContactImpl("Rebecca White");             // meeting contact
-        unknown = new ContactImpl("Anon");                      // unknown contact, not added to manager
-        finderString = "Finder";                                // set string to search by
-        finder = new ContactImpl(finderString);                 // setup contact to use in searches
+        //basil = new ContactImpl("Basil Mason");                 // meeting contact
+        //rebecca = new ContactImpl("Rebecca White");             // meeting contact
+        //unknown = new ContactImpl("Anon");                      // unknown contact, not added to manager
+                                      // set string to search by
+        //finder = new ContactImpl(finderString);                 // setup contact to use in searches
         contacts = new HashSet<Contact>();                      // collection of contacts for meetings
-        contacts.add(basil);                                    // add contact
-        contacts.add(rebecca);                                  // add contact
+        //contacts.add(basil);                                    // add contact
+        //contacts.add(rebecca);                                  // add contact
+
+        for (Contact c : contactManager.getContacts(basilString))
+            contacts.add(c);
+
+        for (Contact c : contactManager.getContacts(rebeccaString))
+            contacts.add(c);
+
+        for (Contact c : contactManager.getContacts(finderString))
+            contacts.add(c);
 
         // setup dates
         past = Calendar.getInstance();
@@ -42,11 +65,7 @@ public class ContactManagerTest {
         future = Calendar.getInstance();
         future.add(Calendar.DAY_OF_MONTH, +1);                  // date for future meeting
 
-        // setup contact manager
-        contactManager = new ContactManagerImpl();
-        contactManager.addNewContact(basil.getName(), "");      // add contact to contact manager
-        contactManager.addNewContact(rebecca.getName(), "");    // add contact to contact manager
-        contactManager.addNewContact(finder.getName(), "");     // add contact to contact manager
+
 
     }
 
@@ -80,7 +99,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Test
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
