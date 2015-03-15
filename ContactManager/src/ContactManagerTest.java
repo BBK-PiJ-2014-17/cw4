@@ -232,7 +232,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check it works for past and future meetings
      */
-    @Test
+    @Ignore
     public void testGetMeeting() throws Exception {
 
         int meetingId;
@@ -568,7 +568,7 @@ public class ContactManagerTest {
      *      - add new contact and check name and notes
      *      - check for NullPointerException if any input is null
      */
-    @Ignore
+    @Ignore           // TESTED
     public void testAddNewContact() throws Exception {
 
         String newContactName = "Mr New Contact";                           // setup new contact
@@ -590,7 +590,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Ignore           // TESTED
     public void testAddNewContactThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);          // expect null pointer exception
