@@ -69,7 +69,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if meeting set in the past
      *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
-    @Ignore
+    @Test
     public void testAddFutureMeeting() throws Exception {
 
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
@@ -382,7 +382,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if contacts empty
      *      - check for NullPointerException if any input is null
      */
-    @Test
+    @Ignore
     public void testAddNewPastMeeting() throws Exception {
 
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return

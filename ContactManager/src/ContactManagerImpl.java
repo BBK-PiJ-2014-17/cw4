@@ -30,7 +30,7 @@ public class ContactManagerImpl implements ContactManager {
     private final String filePath = "contacts.xml"; // contact manager output file
     private Set<Contact> contacts;                  // collection of contacts
     private List<? super Meeting> meetings;         // list of meetings (Past or Future)
-    private int CM_ID = 0;                              // unique ID for meeting and contact creation
+    private static int CM_ID = 0;                              // unique ID for meeting and contact creation
     SimpleDateFormat format;                        // format for dates in file
 
     // meeting type enum
@@ -46,6 +46,11 @@ public class ContactManagerImpl implements ContactManager {
         public String toString() {
             return type;
         }
+    }
+
+    public static int uniqueId() {
+        CM_ID++;
+        return CM_ID;
     }
 
     // constructor
@@ -598,10 +603,7 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
-    private int uniqueId() {
-        CM_ID++;
-        return CM_ID;
-    }
+
 
     private void sortMeetings() {
 

@@ -15,15 +15,11 @@ public class MeetingImpl implements Meeting {
     private Calendar meetingDate;
     private Set<Contact> meetingContacts;
 
-    public static int UNIQUE_ID = 0;
-
     // constructors
 
     public MeetingImpl(Calendar meetingDate, Set<Contact> meetingContacts) {
 
-        UNIQUE_ID++;
-
-        this.meetingId = UNIQUE_ID;
+        this.meetingId = ContactManagerImpl.uniqueId();
         this.meetingDate = meetingDate;
         this.meetingContacts = meetingContacts;
 
