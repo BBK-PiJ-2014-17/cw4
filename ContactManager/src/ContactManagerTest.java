@@ -404,7 +404,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if contacts empty
      *      - check for NullPointerException if any input is null
      */
-    @Test
+    @Ignore
     public void testAddNewPastMeeting() throws Exception {
 
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return
@@ -416,22 +416,15 @@ public class ContactManagerTest {
 
             String notes = pm.getNotes();
 
-            System.out.println(notes);
-
-            //assertEquals(pastMeetingNotes, notes);
-
             assertTrue(pastMeetingNotes.equals(notes));
         }
 
-        //PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
-        //assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
-
     }
 
-    @Ignore
+    @Test
     public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
 
-        contacts.add(unknown);
+        contacts.add(new ContactImpl(99999, "Anon"));
         thrown.expect(IllegalArgumentException.class);                // expect illegal argument exception
         contactManager.addNewPastMeeting(contacts, past, "");         // due to unknown contact
 

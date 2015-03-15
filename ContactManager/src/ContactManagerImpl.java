@@ -648,7 +648,7 @@ public class ContactManagerImpl implements ContactManager {
 
         boolean ret = true;
 
-        for (Contact c : contacts) {
+        for (Contact c : checkContacts) {
 
             boolean exists = false;
 
