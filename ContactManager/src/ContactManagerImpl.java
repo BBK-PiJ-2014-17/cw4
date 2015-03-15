@@ -232,7 +232,19 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public Meeting getMeeting(int id) {
-        return null;
+
+        Meeting ret = null, m;
+
+        for (Object o : meetings) {
+
+            m = (Meeting) o;
+
+            if (m.getId() == id)
+                ret = m;
+
+        }
+
+        return ret;
     }
 
     @Override
