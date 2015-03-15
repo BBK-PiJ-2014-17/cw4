@@ -211,7 +211,23 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public FutureMeeting getFutureMeeting(int id) {
-        return null;
+
+        FutureMeeting ret = null;
+
+        for (Object m : meetings) {
+
+            if (m instanceof FutureMeeting) {
+
+                FutureMeeting fm = (FutureMeeting) m;
+
+                if (fm.getId() == id) {
+                    ret = fm;
+                }
+            }
+
+        }
+
+        return ret;
     }
 
     @Override
