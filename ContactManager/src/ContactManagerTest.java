@@ -192,7 +192,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore           // TESTED
     public void testGetFutureMeetingThrowsIllegalArgumentException() {
 
         int futureMeetingId;
@@ -203,13 +203,6 @@ public class ContactManagerTest {
         contactManager.getFutureMeeting(futureMeetingId);   // due to meeting in past
 
         // method 2, setup new past meeting directly, with unique contact to search by
-        //contacts.add(finder);                                                   // add finder contact to contacts for meeting
-        //contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
-        //PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
-        //futureMeetingId = pm.getId();                                           // get id of past meeting
-        //thrown.expect(IllegalArgumentException.class);                          // expect invalid argument exception
-        //contactManager.getFutureMeeting(futureMeetingId);                       // due to meeting in past
-
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String n1 = sdf.format(new Date()).toString();
         int c1 = generateUniqueContactForMeetings(n1);
@@ -239,24 +232,39 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check it works for past and future meetings
      */
-    @Ignore
+    @Test
     public void testGetMeeting() throws Exception {
 
         int meetingId;
 
+        // 1. get future meeting
         meetingId = contactManager.addFutureMeeting(contacts, future);          // future meeting
         assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
 
+        // 2. get future-turned-past meeting
         meetingId = setupPastMeeting(contacts);                                         // future meeting turned past meeting
         assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
 
-        //contacts.add(finder);                                                   // add finder contact to contacts for meeting
-        //contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
-        //PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // direct past meeting
-        //meetingId = pm.getId();                                                 // get id of past meeting
-        //assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());  // test get meeting
+        // 3. get direct past meeting
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+        int c1 = generateUniqueContactForMeetings(n1);
+        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];
 
-        // test null returned if meeting does not exist
+        Set<Contact> cs = new HashSet<Contact>();
+        cs.add(c);
+
+        contactManager.addNewPastMeeting(cs, past, n1);
+
+        List<PastMeeting> pms = contactManager.getPastMeetingList(c);
+
+        for (PastMeeting m : pms) {
+
+            meetingId = m.getId();                                           // get id of past meeting
+            assertEquals(meetingId, contactManager.getMeeting(meetingId).getId());
+        }
+
+        // 4. test null returned if meeting does not exist
         assertTrue(contactManager.getMeeting(99999) == null);
 
     }
