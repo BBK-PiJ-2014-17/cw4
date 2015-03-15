@@ -249,7 +249,24 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public List<Meeting> getFutureMeetingList(Contact contact) {
-        return null;
+
+        List<Meeting> ret = new ArrayList<Meeting>();
+
+        for (Object o : meetings) {
+
+            Meeting m = (Meeting) o;
+            Set<Contact> cs = m.getContacts();
+
+            for (Contact c : cs) {
+
+                if (contact.getId() == c.getId())
+                    ret.add(m);
+
+            }
+
+        }
+
+        return ret;
     }
 
     @Override
