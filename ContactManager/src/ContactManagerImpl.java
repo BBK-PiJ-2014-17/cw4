@@ -285,6 +285,9 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public List<Meeting> getFutureMeetingList(Contact contact) {
 
+        if (!checkContactExists(contact))
+            throw new IllegalArgumentException();
+
         List<Meeting> ret = new ArrayList<Meeting>();
 
         for (Object o : meetings) {
@@ -649,6 +652,15 @@ public class ContactManagerImpl implements ContactManager {
         };
 
         Collections.sort(meetings, comp);  */
+
+    }
+
+    private boolean checkContactExists(Contact c) {
+
+        Set<Contact> cs = new HashSet<Contact>();
+        cs.add(c);
+
+        return checkContactsExist(cs);
 
     }
 
