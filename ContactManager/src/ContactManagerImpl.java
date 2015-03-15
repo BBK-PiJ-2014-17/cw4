@@ -225,6 +225,10 @@ public class ContactManagerImpl implements ContactManager {
                 if (pm.getId() == id) {
                     ret = pm;
                 }
+            } else if (m instanceof FutureMeeting) {
+
+                throw new IllegalArgumentException();
+
             }
 
         }
