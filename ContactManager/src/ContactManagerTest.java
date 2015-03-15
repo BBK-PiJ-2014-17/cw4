@@ -80,7 +80,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Test
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception

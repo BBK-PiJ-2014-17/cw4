@@ -27,7 +27,7 @@ import java.util.*;
  */
 public class ContactManagerImpl implements ContactManager {
 
-    private final String filePath = "contacts.txt"; // contact manager output file
+    private final String filePath = "contacts.xml"; // contact manager output file
     private Set<Contact> contacts;                  // collection of contacts
     private List<? super Meeting> meetings;         // list of meetings (Past or Future)
     private int CM_ID = 0;                              // unique ID for meeting and contact creation
@@ -124,7 +124,7 @@ public class ContactManagerImpl implements ContactManager {
 
                         Set<Contact> meetingContacts = new HashSet<Contact>();  // set for current meeting
 
-                        meetingContactNodes = doc.getElementsByTagName("meetingContacts");  // get list of meeting contact nodes
+                        meetingContactNodes = eElement.getElementsByTagName("meetingContact");  // get list of meeting contact nodes
 
                         for (int j = 0; j < meetingContactNodes.getLength(); j++) {     // read each node into current meeting contact set
 
@@ -133,6 +133,7 @@ public class ContactManagerImpl implements ContactManager {
                             if (nMeetingContactNode.getNodeType() == Node.ELEMENT_NODE) {       // read only element type nodes
 
                                 Element eMeetingContactElement = (Element) nMeetingContactNode; // current element node
+
                                 int id = Integer.parseInt(eMeetingContactElement.getAttribute("id"));   // get meeting ID
 
                                 Set<Contact> cs = getContacts(id);      // find contact by ID
@@ -144,7 +145,7 @@ public class ContactManagerImpl implements ContactManager {
 
                         // determine meeting type and add meeting to meeting list
 
-                        if (eElement.getAttribute("type").equals(MeetingType.PAST)) {
+                        if (eElement.getAttribute("type").equals(MeetingType.PAST.toString())) {
 
                             PastMeeting m = new PastMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
                                     meetingDate,
@@ -153,7 +154,7 @@ public class ContactManagerImpl implements ContactManager {
 
                             meetings.add(m);
 
-                        } else if (eElement.getAttribute("type").equals(MeetingType.FUTURE)) {
+                        } else if (eElement.getAttribute("type").equals(MeetingType.FUTURE.toString())) {
 
                             FutureMeeting m = new FutureMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
                                     meetingDate,
@@ -179,6 +180,24 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
+
+        //
+        Calendar now = Calendar.getInstance();
+        if (now.compareTo(date) > 0)    // past meeting date
+            throw new IllegalArgumentException();
+
+        boolean exists = true;
+
+        for (Contact c : contacts) {
+
+            if (!this.contacts.contains(c))
+                exists = false;
+
+        }
+
+        if (!exists)
+            throw new IllegalArgumentException();
+
 
         int id = uniqueId();
 
@@ -401,8 +420,16 @@ public class ContactManagerImpl implements ContactManager {
 
         for (Contact c : contacts) {
 
-            if (Arrays.asList(ids).contains(c.getId()))
-                ret.add(c);
+            for (int i : ids) {
+
+                if (i == c.getId()) {
+                    ret.add(c);
+                }
+
+            }
+
+            //if (Arrays.asList(ids).contains(c.getId()))
+            //    ret.add(c);
 
         }
 
