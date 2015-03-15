@@ -191,9 +191,22 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public PastMeeting getPastMeeting(int id) {
 
+        PastMeeting ret = null;
 
+        for (Object m : meetings) {
 
-        return null;
+            if (m instanceof PastMeeting) {
+
+                PastMeeting pm = (PastMeeting) m;
+
+                if (pm.getId() == id) {
+                    ret = pm;
+                }
+            }
+
+        }
+
+        return ret;
     }
 
     @Override
