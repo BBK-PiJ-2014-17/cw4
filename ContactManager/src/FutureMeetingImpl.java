@@ -18,6 +18,12 @@ public class FutureMeetingImpl implements FutureMeeting {
 
     }
 
+    public FutureMeetingImpl(int meetingId, Calendar meetingDate, Set<Contact> meetingContacts) {
+
+        m = new MeetingImpl(meetingId, meetingDate, meetingContacts);
+
+    }
+
     @Override
     public int getId() {
         return m.getId();
