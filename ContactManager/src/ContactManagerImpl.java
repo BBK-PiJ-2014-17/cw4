@@ -287,10 +287,30 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public void addMeetingNotes(int id, String text) {
 
+        if (text == null)
+            throw new IllegalArgumentException();
+
+        Meeting m = getMeeting(id);
+
+        if (m == null)
+            throw new IllegalArgumentException();
+
+        Calendar now = Calendar.getInstance();
+        if (now.compareTo(m.getDate()) < 0)
+            throw new IllegalStateException();
+
+        PastMeeting pm = new PastMeetingImpl(m, text);
+
+        meetings.remove(m);     // remove existing meeting
+        meetings.add(pm);       // add new past meeting with notes
+
     }
 
     @Override
     public void addNewContact(String name, String notes) {
+
+        if (name == null || notes == null)
+            throw new NullPointerException();
 
         contacts.add(new ContactImpl(uniqueId(), name, notes));
 
@@ -298,6 +318,25 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public Set<Contact> getContacts(int... ids) {
+
+        for (int i : ids) {
+
+            boolean exists = false;
+
+            for (Contact c : contacts) {
+
+                if (i == c.getId()) {
+
+                    exists = true;
+
+                }
+
+            }
+
+            if (!exists)
+                throw new IllegalArgumentException();
+
+        }
 
         Set<Contact> ret = new HashSet<Contact>();
 
@@ -313,6 +352,9 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public Set<Contact> getContacts(String name) {
+
+        if (name == null)
+            throw new NullPointerException();
 
         Set<Contact> ret = new HashSet<Contact>();
 
