@@ -69,7 +69,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if meeting set in the past
      *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
-    @Test
+    @Ignore
     public void testAddFutureMeeting() throws Exception {
 
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
@@ -80,7 +80,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -100,7 +100,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the future
      */
-    @Test
+    @Ignore
     public void testGetPastMeeting() throws Exception {
 
         PastMeeting pm;
@@ -382,7 +382,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if contacts empty
      *      - check for NullPointerException if any input is null
      */
-    @Ignore
+    @Test
     public void testAddNewPastMeeting() throws Exception {
 
         String pastMeetingNotes = "blah blah";                                  // meeting notes to check on return

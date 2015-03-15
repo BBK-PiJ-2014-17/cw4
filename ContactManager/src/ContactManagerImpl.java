@@ -185,27 +185,8 @@ public class ContactManagerImpl implements ContactManager {
         if (now.compareTo(date) > 0)    // past meeting date
             throw new IllegalArgumentException();
 
-        boolean exists1 = true;
-
-        for (Contact c : contacts) {
-
-            boolean exists2 = false;
-
-            for (Contact known : this.contacts) {
-
-                if (known.getId() == c.getId())
-                    exists2 = true;
-
-            }
-
-            if (!exists2)
-                exists1 = false;
-
-        }
-
-        if (!exists1)
+        if (!checkContactsExist(contacts))
             throw new IllegalArgumentException();
-
 
         int id = uniqueId();
 
@@ -364,16 +345,7 @@ public class ContactManagerImpl implements ContactManager {
         if (contacts.isEmpty())
             throw new IllegalArgumentException();
 
-        boolean exists = true;
-
-        for (Contact c : contacts) {
-
-            if (!this.contacts.contains(c))
-                exists = false;
-
-        }
-
-        if (!exists)
+        if (!checkContactsExist(contacts))
             throw new IllegalArgumentException();
 
         this.meetings.add(new PastMeetingImpl(uniqueId(), date, contacts, text));
@@ -659,6 +631,30 @@ public class ContactManagerImpl implements ContactManager {
         };
 
         Collections.sort(meetings, comp);  */
+
+    }
+
+    private boolean checkContactsExist(Set<Contact> checkContacts) {
+
+        boolean ret = true;
+
+        for (Contact c : contacts) {
+
+            boolean exists = false;
+
+            for (Contact known : this.contacts) {
+
+                if (known.getId() == c.getId())
+                    exists = true;
+
+            }
+
+            if (!exists)
+                ret = false;
+
+        }
+
+        return ret;
 
     }
 
