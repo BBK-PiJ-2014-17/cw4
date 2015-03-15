@@ -124,7 +124,7 @@ public class ContactManagerImpl implements ContactManager {
 
                         Set<Contact> meetingContacts = new HashSet<Contact>();  // set for current meeting
 
-                        meetingContactNodes = eElement.getElementsByTagName("meetingContact");  // get list of meeting contact nodes
+                        meetingContactNodes = doc.getElementsByTagName("meetingContact");  // get list of meeting contact nodes
 
                         for (int j = 0; j < meetingContactNodes.getLength(); j++) {     // read each node into current meeting contact set
 
@@ -181,21 +181,29 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
 
-        //
         Calendar now = Calendar.getInstance();
         if (now.compareTo(date) > 0)    // past meeting date
             throw new IllegalArgumentException();
 
-        boolean exists = true;
+        boolean exists1 = true;
 
         for (Contact c : contacts) {
 
-            if (!this.contacts.contains(c))
-                exists = false;
+            boolean exists2 = false;
+
+            for (Contact known : this.contacts) {
+
+                if (known.getId() == c.getId())
+                    exists2 = true;
+
+            }
+
+            if (!exists2)
+                exists1 = false;
 
         }
 
-        if (!exists)
+        if (!exists1)
             throw new IllegalArgumentException();
 
 

@@ -88,7 +88,7 @@ public class ContactManagerTest {
 
         contacts.add(unknown);  // add contact unknown to contact manager to set of contacts for meeting
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
-        contactManager.addFutureMeeting(contacts, past);    // due to unknown contact
+        contactManager.addFutureMeeting(contacts, future);    // due to unknown contact
 
     }
 
