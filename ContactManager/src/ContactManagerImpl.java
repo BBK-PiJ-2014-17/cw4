@@ -7,6 +7,11 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerException;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -25,19 +30,18 @@ public class ContactManagerImpl implements ContactManager {
     private final String filePath = "contacts.txt"; // contact manager output file
     private Set<Contact> contacts;                  // collection of contacts
     private List<? super Meeting> meetings;         // list of meetings (Past or Future)
+    private int CM_ID;                              // unique ID for meeting and contact creation
+    SimpleDateFormat format;                        // format for dates in file
 
     // meeting type enum
 
     private enum MeetingType {
         PAST ("past"),
         FUTURE ("future");
-
         private final String type;
-
         private MeetingType(final String type) {
             this.type = type;
         }
-
         @Override
         public String toString() {
             return type;
@@ -56,6 +60,7 @@ public class ContactManagerImpl implements ContactManager {
 
         contacts = new HashSet<Contact>();                          // initialise contacts set
         meetings = new ArrayList<Meeting>();                        // initialise meetings list
+        format = new SimpleDateFormat("dd-MM-yyyy");                // initialise date format
 
         // setup file read
 
@@ -106,7 +111,6 @@ public class ContactManagerImpl implements ContactManager {
 
                     // meeting date from file as calendar object
 
-                    SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy");   // set date format for read
                     Date xmlDate = format.parse(eElement.getElementsByTagName("date").item(0).getTextContent());    // read date from string
                     Calendar meetingDate = Calendar.getInstance();  // create calendar object
                     meetingDate.setTime(xmlDate);                   // initialise calendar object with date from file
@@ -146,7 +150,7 @@ public class ContactManagerImpl implements ContactManager {
 
                     } else if (eElement.getAttribute("type").equals(MeetingType.FUTURE)) {
 
-                        FutureMeetingImpl m = new FutureMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
+                        FutureMeeting m = new FutureMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
                                                                     meetingDate,
                                                                     meetingContacts);
 
@@ -156,7 +160,6 @@ public class ContactManagerImpl implements ContactManager {
 
                 }
             }
-
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -232,6 +235,147 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public void flush() {
+
+        Document output;
+        Element contactRoot, meetingRoot;
+        DocumentBuilderFactory docFactory;
+        DocumentBuilder docBuilder;
+
+        try {
+
+            docFactory = DocumentBuilderFactory.newInstance();
+            docBuilder = docFactory.newDocumentBuilder();
+
+            // root element - contactmanager
+            output = docBuilder.newDocument();
+            Element rootElement = output.createElement("contactmanager");
+            output.appendChild(rootElement);
+
+            // contacts element - contact
+            contactRoot = output.createElement("contacts");
+            rootElement.appendChild(contactRoot);
+
+            // meetings element - meeting
+            meetingRoot = output.createElement("meetings");
+            rootElement.appendChild(meetingRoot);
+
+            // add contacts
+
+            for (Contact c : contacts) {
+                addContactElement(output, contactRoot, "" + c.getId(), c.getName(), c.getNotes());
+            }
+
+            for (Object m : meetings) {
+
+                if (m instanceof PastMeeting) {
+
+                    PastMeeting pm = (PastMeeting) m;
+                    addMeetingElement(output,
+                            meetingRoot,
+                            "" + pm.getId(),
+                            MeetingType.PAST.toString(),
+                            pm.getDate(),
+                            pm.getContacts(),
+                            pm.getNotes());
+
+                } else if (m instanceof FutureMeeting) {
+
+                    FutureMeeting fm = (FutureMeeting) m;
+                    addMeetingElement(output,
+                            meetingRoot,
+                            "" + fm.getId(),
+                            MeetingType.FUTURE.toString(),
+                            fm.getDate(),
+                            fm.getContacts(),
+                            "");
+
+                }
+
+            }
+
+            // write the content into xml file
+            TransformerFactory transformerFactory = TransformerFactory.newInstance();
+            Transformer transformer = transformerFactory.newTransformer();
+            DOMSource source = new DOMSource(output);
+            StreamResult result = new StreamResult(new File(filePath));
+
+            // Output to console for testing
+            //StreamResult result = new StreamResult(System.out);
+
+            transformer.transform(source, result);
+
+        } catch (ParserConfigurationException pce) {
+            pce.printStackTrace();
+        } catch (TransformerException tfe) {
+            tfe.printStackTrace();
+        }
+
+    }
+
+    // internal methods for xml construction
+
+    private void addContactElement(Document output, Element root, String id, String name, String notes) {
+
+        Element contact, eName, eNotes;
+
+        // contact root
+        contact = output.createElement("contact");
+        root.appendChild(contact);
+
+        // set contact id attribute
+        contact.setAttribute("id", id);
+
+        // add contact name
+        eName = output.createElement("name");
+        eName.appendChild(output.createTextNode(name));
+        contact.appendChild(eName);
+
+        // add contact notes
+        eNotes = output.createElement("notes");
+        eNotes.appendChild(output.createTextNode(notes));
+        contact.appendChild(eNotes);
+
+    }
+
+    private void addMeetingElement(Document output,
+                                   Element root,
+                                   String id,
+                                   String type,
+                                   Calendar date,
+                                   Set<Contact> meetingContacts,
+                                   String notes) {
+
+        Element meeting, eDate, eMeetingContacts, eNotes;
+
+        // meeting root
+        meeting = output.createElement("meeting");
+        root.appendChild(meeting);
+
+        // set meeting id attribute
+        meeting.setAttribute("id", id);
+        meeting.setAttribute("type", type);
+
+        // meeting date
+        eDate = output.createElement("date");
+        eDate.appendChild(output.createTextNode(format.format(date.getTime())));
+        meeting.appendChild(eDate);
+
+        // meeting contacts
+        eMeetingContacts = output.createElement("meetingContacts");
+        meeting.appendChild(eMeetingContacts);
+
+        for (Contact c : meetingContacts) {
+
+            Element contact = output.createElement("meetingContact");
+            contact.setAttribute("id", "" + c.getId());
+            eMeetingContacts.appendChild(contact);
+
+        }
+
+        // meeting notes
+        eNotes = output.createElement("notes");
+        eNotes.appendChild(output.createTextNode(notes));
+        meeting.appendChild(eNotes);
 
     }
 }
