@@ -421,7 +421,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore
     public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
 
         contacts.add(new ContactImpl(99999, "Anon"));
@@ -433,7 +433,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Test
     public void testAddNewPastMeetingThrowsNullPointerException() throws Exception {
 
         thrown.expect(NullPointerException.class);              // expect null pointer exception

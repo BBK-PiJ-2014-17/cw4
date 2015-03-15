@@ -353,7 +353,7 @@ public class ContactManagerImpl implements ContactManager {
     public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text) {
 
         if (contacts == null || date == null || text == null)
-            throw new IllegalArgumentException();
+            throw new NullPointerException();
 
         if (contacts.isEmpty())
             throw new IllegalArgumentException();
