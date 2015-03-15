@@ -301,7 +301,17 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public Set<Contact> getContacts(String name) {
-        return null;
+
+        Set<Contact> ret = new HashSet<Contact>();
+
+        for (Contact c : contacts) {
+
+            if (c.getName().equals(name))
+                ret.add(c);
+
+        }
+
+        return ret;
     }
 
     @Override
