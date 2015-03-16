@@ -288,6 +288,8 @@ public class ContactManagerImpl implements ContactManager {
         if (!checkContactExists(contact))
             throw new IllegalArgumentException();
 
+        updateMeetingTypes();   // update any future meetings
+
         List<Meeting> ret = new ArrayList<Meeting>();
 
         for (Object o : meetings) {
@@ -333,6 +335,9 @@ public class ContactManagerImpl implements ContactManager {
 
     @Override
     public List<PastMeeting> getPastMeetingList(Contact contact) {
+
+        if (!checkContactExists(contact))
+            throw new IllegalArgumentException();
 
         updateMeetingTypes();   // update any future meetings
 
@@ -380,7 +385,7 @@ public class ContactManagerImpl implements ContactManager {
     public void addMeetingNotes(int id, String text) {
 
         if (text == null)
-            throw new IllegalArgumentException();
+            throw new NullPointerException();
 
         Meeting m = getMeeting(id);
 
@@ -688,7 +693,7 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
-    private void updateMeetingTypes() {
+    private synchronized void updateMeetingTypes() {
 
         for (Object m : meetings) {
 
