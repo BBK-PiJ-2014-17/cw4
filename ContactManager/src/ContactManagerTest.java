@@ -609,7 +609,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if id does not exist
      *      - check for NullPointerException if name is null
      */
-    @Ignore
+    @Ignore           // TESTED
     public void testGetContactsById() throws Exception {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -625,7 +625,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Ignore             // TESTED
     public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
 
         thrown.expect(IllegalArgumentException.class);  // expect illegal argument exception
@@ -634,21 +634,30 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Test
     public void testGetContactsByName() throws Exception {
 
-        String contactName = "New Contact";                 // setup new contacts
-        Contact contact1 = new ContactImpl(contactName);
-        Contact contact2 = new ContactImpl(contactName);
-        Contact contact3 = new ContactImpl(contactName);
+        //String contactName = "New Contact";                 // setup new contacts
+        //Contact contact1 = new ContactImpl(contactName);
+        //Contact contact2 = new ContactImpl(contactName);
+        //Contact contact3 = new ContactImpl(contactName);
 
-        int[] contactIds = {contact1.getId(), contact2.getId(), contact3.getId()};  // array of expected contact ids
+        String contactName = "New Contact";
+        String contactNotes1 = "New Notes 1";
+        String contactNotes2 = "New Notes 2";
+        String contactNotes3 = "New Notes 3";
+
+        contactManager.addNewContact(contactName, contactNotes1);
+        contactManager.addNewContact(contactName, contactNotes2);
+        contactManager.addNewContact(contactName, contactNotes3);
+
+        String[] contactNotes = {contactNotes1, contactNotes2, contactNotes3};  // array of expected contact notes
         Set<Contact> cs = contactManager.getContacts(contactName);  // get contacts by name
 
         int count = 0;
         for (Contact c : cs) {              // for each contact
-            for (int id : contactIds) {
-                if (c.getId() == id)        // check id corresponds to an expected id
+            for (String s : contactNotes) {
+                if (c.getNotes().equals(s))        // check id corresponds to an expected id
                     count++;
             }
 
