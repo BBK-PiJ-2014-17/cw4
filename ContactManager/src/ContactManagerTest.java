@@ -612,9 +612,15 @@ public class ContactManagerTest {
     @Ignore
     public void testGetContactsById() throws Exception {
 
-        Set<Contact> cs = contactManager.getContacts(basil.getId(), rebecca.getId());       // get two known contacts by id
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+        int contact1 = generateUniqueContactForMeetings(n1);
+        String n2 = sdf.format(new Date()).toString();
+        int contact2 = generateUniqueContactForMeetings(n2);
+
+        Set<Contact> cs = contactManager.getContacts(contact1, contact2);       // get two known contacts by id
         for (Contact c : cs) {
-            assertTrue(c.getName().equals(basil.getName()) || c.getName().equals(rebecca.getName()));   // check id returns name that exists
+            assertTrue(c.getNotes().equals(n1) || c.getNotes().equals(n2));   // check id returns name that exists
         }
 
     }
