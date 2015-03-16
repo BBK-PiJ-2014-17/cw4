@@ -150,8 +150,6 @@ public class ContactManagerTest {
 
             String notes = m.getNotes();
 
-            System.out.println(notes);
-
             assertTrue(n1.equals(notes));
         }
 
@@ -505,25 +503,52 @@ public class ContactManagerTest {
      *      - check for IllegalStateException if meeting set in future
      *      - check for NullPointerException if any notes are null
      */
-    @Ignore
+    @Test
     public void testAddMeetingNotes() throws Exception {
 
         PastMeeting pm;
-        String pastMeetingNotes = "blah blah";  // meeting notes to check
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+        String pastMeetingNotes = "blah blah" + n1;  // meeting notes to check
 
         // method 1, setup future meeting and wait until it is a past meeting
         // then add notes by id
-        int pastMeetingId = setupPastMeeting(contacts);                         // setup future-turned-past meeting
+
+        int c = generateUniqueContactForMeetings("blah blah" + n1);
+
+        Set<Contact> cs = contactManager.getContacts(c);
+
+        int pastMeetingId = setupPastMeeting(cs);                         // setup future-turned-past meeting
         pm = contactManager.getPastMeeting(pastMeetingId);                      // get past meeting by id
         contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);           // add notes
-        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
+
+        List<PastMeeting> pms = contactManager.getPastMeetingList((Contact) contactManager.getContacts(c).toArray()[0]);
+
+        for (PastMeeting m : pms) {
+
+            assertTrue(pastMeetingNotes.equals(m.getNotes()));                     // test meeting notes match
+        }
 
         // method 2, setup new past meeting directly, with unique contact to search by
-        contacts.add(finder);                                                   // add finder contact to contacts for meeting
-        contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
-        pm = contactManager.getPastMeetingList(finder).get(0);                  // return the past meeting based on finder contact
-        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);           // add notes
-        assertTrue(pastMeetingNotes.equals(pm.getNotes()));                     // test meeting notes match
+
+        String n2 = sdf.format(new Date()).toString();
+        int c2 = generateUniqueContactForMeetings(n1);
+        Contact contact2 = (Contact) contactManager.getContacts(c2).toArray()[0];
+
+        Set<Contact> cs2 = new HashSet<Contact>();
+        cs2.add(contact2);
+
+        contactManager.addNewPastMeeting(cs2, past, n2);
+
+        List<PastMeeting> pms2 = contactManager.getPastMeetingList(contact2);
+
+        for (PastMeeting m : pms2) {
+
+            String notes = m.getNotes();
+
+            assertTrue(n2.equals(notes));
+
+        }
 
     }
 
@@ -634,18 +659,17 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore           // TESTED
     public void testGetContactsByName() throws Exception {
 
-        //String contactName = "New Contact";                 // setup new contacts
-        //Contact contact1 = new ContactImpl(contactName);
-        //Contact contact2 = new ContactImpl(contactName);
-        //Contact contact3 = new ContactImpl(contactName);
-
         String contactName = "New Contact";
-        String contactNotes1 = "New Notes 1";
-        String contactNotes2 = "New Notes 2";
-        String contactNotes3 = "New Notes 3";
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+
+        String contactNotes1 = "New Notes 1" + n1;
+        String contactNotes2 = "New Notes 2" + n1;
+        String contactNotes3 = "New Notes 3" + n1;
 
         contactManager.addNewContact(contactName, contactNotes1);
         contactManager.addNewContact(contactName, contactNotes2);
@@ -667,7 +691,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore
+    @Ignore             // TESTED
     public void testGetContactsByNameThrowsNullPointerException() throws Exception {
 
         String sNull = null;                        // setup null string
