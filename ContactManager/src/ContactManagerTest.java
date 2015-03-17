@@ -384,7 +384,7 @@ public class ContactManagerTest {
      *      - confirm chronology of returned list
      *      - check for IllegalArgumentException if contact unknown to contact manager
      */
-    @Ignore         // TESTED (needs improving)
+    @Ignore         // TESTED (needs improving) --  retest
     public void testGetPastMeetingList() throws Exception {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -530,7 +530,7 @@ public class ContactManagerTest {
      *      - check for IllegalStateException if meeting set in future
      *      - check for NullPointerException if any notes are null
      */
-    @Ignore           // TESTED
+    @Test           // TESTED -- retest
     public void testAddMeetingNotes() throws Exception {
 
         PastMeeting pm;
@@ -579,7 +579,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    @Ignore             // TESTED -- retest
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
         int meetingId = 12345678;       // meeting id does not exist
@@ -734,14 +734,19 @@ public class ContactManagerTest {
      * Required tests:
      *      - check data saved to file
      */
-    @Ignore
+    @Ignore            // TESTED
     public void testFlush() throws Exception {
 
-        String contactName = "Test Contact";
-        String contactNotes = "Test Notes";
+        //String contactName = "Test Contact";
+        //String contactNotes = "Test Notes";
 
         int meetingId = contactManager.addFutureMeeting(contacts, future);  // add meeting to contact manager
-        contactManager.addNewContact(contactName, contactNotes);            // add contact to contact manager
+        //contactManager.addNewContact(contactName, contactNotes);            // add contact to contact manager
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+
+        int contactId = generateUniqueContactForMeetings(n1);
 
         contactManager.flush();     // save contents to file
 
@@ -749,7 +754,7 @@ public class ContactManagerTest {
 
         assertTrue(newContactManager.getMeeting(meetingId) != null);    // check meeting exists in new contact manager
 
-        Set<Contact> cs = newContactManager.getContacts(contactName);   // get contacts by name
+        Set<Contact> cs = newContactManager.getContacts(contactId);   // get contacts by name
         assertTrue(cs.size() == 1);     // check contact exists
 
     }

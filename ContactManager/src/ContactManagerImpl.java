@@ -227,7 +227,11 @@ public class ContactManagerImpl implements ContactManager {
                 }
             } else if (m instanceof FutureMeeting) {
 
-                throw new IllegalArgumentException();
+                FutureMeeting fm = (FutureMeeting) m;
+
+                if (fm.getId() == id) {
+                    throw new IllegalArgumentException();
+                }
 
             }
 
@@ -254,7 +258,11 @@ public class ContactManagerImpl implements ContactManager {
                 }
             } else if (m instanceof PastMeeting) {
 
-                throw new IllegalArgumentException();
+                PastMeeting pm = (PastMeeting) m;
+
+                if (pm.getId() == id) {
+                    throw new IllegalArgumentException();
+                }
 
             }
 
