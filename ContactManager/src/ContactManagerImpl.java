@@ -33,6 +33,8 @@ public class ContactManagerImpl implements ContactManager {
     private static int CM_ID = 0;                              // unique ID for meeting and contact creation
     SimpleDateFormat format;                        // format for dates in file
 
+    private Object obj = new Object();
+
     // meeting type enum
 
     private enum MeetingType {
@@ -406,6 +408,8 @@ public class ContactManagerImpl implements ContactManager {
 
         PastMeeting pm = new PastMeetingImpl(m, text);
 
+        // add all meeting updates into synchronised method
+
         meetings.remove(m);     // remove existing meeting
         meetings.add(pm);       // add new past meeting with notes
 
@@ -703,17 +707,27 @@ public class ContactManagerImpl implements ContactManager {
 
     private synchronized void updateMeetingTypes() {
 
-        for (Object m : meetings) {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
-            if (m instanceof FutureMeeting) {
+        synchronized (obj) {
 
-                FutureMeeting fm = (FutureMeeting) m;
+            for (Object m : meetings) {
 
-                Calendar now = Calendar.getInstance();
-                if (now.compareTo(fm.getDate()) > 0) {
+                if (m instanceof FutureMeeting) {
 
-                    meetings.add(new PastMeetingImpl(fm, ""));
-                    meetings.remove(fm);
+                    FutureMeeting fm = (FutureMeeting) m;
+
+                    Calendar now = Calendar.getInstance();
+                    if (now.compareTo(fm.getDate()) > 0) {
+
+                        meetings.add(new PastMeetingImpl(fm, ""));
+                        meetings.remove(fm);
+
+                    }
 
                 }
 

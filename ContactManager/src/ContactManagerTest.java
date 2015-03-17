@@ -89,7 +89,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if meeting set in the past
      *      - check for IllegalArgumentException if contact unknown to the contact manager
      */
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testAddFutureMeeting() throws Exception {
 
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
@@ -100,7 +100,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -120,7 +120,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the future
      */
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetPastMeeting() throws Exception {
 
         PastMeeting pm;
@@ -158,7 +158,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetPastMeetingThrowsIllegalArgumentException() {
 
         int futureMeetingId = contactManager.addFutureMeeting(contacts, future);    // add future meeting and get ID
@@ -176,7 +176,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the past
      */
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetFutureMeeting() throws Exception {
 
         // add future meeting and get ID
@@ -190,7 +190,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetFutureMeetingThrowsIllegalArgumentException() {
 
         int futureMeetingId;
@@ -230,7 +230,7 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check it works for past and future meetings
      */
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testGetMeeting() throws Exception {
 
         int meetingId;
@@ -277,7 +277,7 @@ public class ContactManagerTest {
      *      - confirm chronology of returned list
      *      - check for IllegalArgumentException if contact unknown to contact manager
      */
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testGetFutureMeetingListByContact() throws Exception {
 
         //String newName = "New Name";
@@ -330,7 +330,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore               // TESTED
+    @Test               // TESTED
     public void testGetFutureMeetingListByContactThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -338,7 +338,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore         // TESTED
+    @Test         // TESTED
     public void testGetFutureMeetingListByDate() throws Exception {
 
         future.add(Calendar.DAY_OF_MONTH, +11);
@@ -384,7 +384,7 @@ public class ContactManagerTest {
      *      - confirm chronology of returned list
      *      - check for IllegalArgumentException if contact unknown to contact manager
      */
-    @Ignore         // TESTED (needs improving) --  retest
+    @Test         // TESTED (needs improving) --  retest
     public void testGetPastMeetingList() throws Exception {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -449,7 +449,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testGetPastMeetingListThrowsIllegalArgumentException() throws Exception {
 
         thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
@@ -466,7 +466,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if contacts empty
      *      - check for NullPointerException if any input is null
      */
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testAddNewPastMeeting() throws Exception {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -492,7 +492,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore               // TESTED
+    @Test               // TESTED
     public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
 
         //contacts.add(new ContactImpl(99999, "Anon"));
@@ -508,7 +508,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore               // TESTED
+    @Test               // TESTED
     public void testAddNewPastMeetingThrowsNullPointerException() throws Exception {
 
         thrown.expect(NullPointerException.class);              // expect null pointer exception
@@ -579,7 +579,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED -- retest
+    @Test             // TESTED -- retest
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
         int meetingId = 12345678;       // meeting id does not exist
@@ -590,19 +590,9 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
-    public void testAddMeetingNotesThrowsIllegalStateException() {
+    
 
-        // add meeting in future
-        int meetingId = contactManager.addFutureMeeting(contacts, future);
-        String notes = "blah blah.";
-
-        thrown.expect(IllegalStateException.class);         // expect illegal state exception
-        contactManager.addMeetingNotes(meetingId, notes);   // due to meeting in future
-
-    }
-
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testAddMeetingNotesThrowsNullPointerException() {
 
         //contacts.add(finder);                                                   // add finder contact to contacts for meeting
@@ -622,21 +612,26 @@ public class ContactManagerTest {
      *      - add new contact and check name and notes
      *      - check for NullPointerException if any input is null
      */
-    @Ignore           // TESTED
+    @Test           // TESTED -- retest
     public void testAddNewContact() throws Exception {
 
-        String newContactName = "Mr New Contact";                           // setup new contact
-        String newContactNotes = "Mr New Contact's notes";
-        contactManager.addNewContact(newContactName, newContactNotes);      // add new contact
+        //String newContactName = "Mr New Contact";                           // setup new contact
+        //String newContactNotes = "Mr New Contact's notes";
+        //contactManager.addNewContact(newContactName, newContactNotes);      // add new contact
+
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String n1 = sdf.format(new Date()).toString();
+
+        int contactId = generateUniqueContactForMeetings(n1);
 
         // retrieve all contacts based on name
-        Set<Contact> cs = contactManager.getContacts(newContactName);
+        Set<Contact> cs = contactManager.getContacts(contactId);
 
         int count = 0;
 
         // for each contact, check notes.
         for (Contact c : cs) {
-            if (c.getNotes().equals(newContactNotes))   // if notes equal new contact notes, increment count
+            if (c.getNotes().equals(n1))   // if notes equal new contact notes, increment count
                 count++;
         }
 
@@ -644,7 +639,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testAddNewContactThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);          // expect null pointer exception
@@ -663,7 +658,7 @@ public class ContactManagerTest {
      *      - check for IllegalArgumentException if id does not exist
      *      - check for NullPointerException if name is null
      */
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetContactsById() throws Exception {
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
@@ -679,7 +674,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
 
         thrown.expect(IllegalArgumentException.class);  // expect illegal argument exception
@@ -688,7 +683,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
+    @Test           // TESTED
     public void testGetContactsByName() throws Exception {
 
         String contactName = "New Contact";
@@ -720,7 +715,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    @Test             // TESTED
     public void testGetContactsByNameThrowsNullPointerException() throws Exception {
 
         String sNull = null;                        // setup null string
@@ -734,7 +729,7 @@ public class ContactManagerTest {
      * Required tests:
      *      - check data saved to file
      */
-    @Ignore            // TESTED
+    @Test            // TESTED
     public void testFlush() throws Exception {
 
         //String contactName = "Test Contact";
@@ -759,6 +754,18 @@ public class ContactManagerTest {
 
     }
 
+    @Test           // TESTED
+    public void testAddMeetingNotesThrowsIllegalStateException() {
+
+        // add meeting in future
+        int meetingId = contactManager.addFutureMeeting(contacts, future);
+        String notes = "blah blah.";
+
+        thrown.expect(IllegalStateException.class);         // expect illegal state exception
+        contactManager.addMeetingNotes(meetingId, notes);   // due to meeting in future
+
+    }
+    
     /**
      * internal test method to setup meeting that starts in future but turns into past meeting
      * @param withContacts contacts for meeting
