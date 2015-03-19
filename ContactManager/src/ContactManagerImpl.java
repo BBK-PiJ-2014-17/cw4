@@ -320,6 +320,8 @@ public class ContactManagerImpl implements ContactManager {
 
         }
 
+        sortMeetingList(ret);
+
         return ret;
     }
 
@@ -641,25 +643,7 @@ public class ContactManagerImpl implements ContactManager {
 
 
 
-    private void sortMeetings() {
-
-        /*
-
-        Set<? super Meeting> sortedMeetings = new HashSet<Meeting>();
-
-        while(!this.meetings.isEmpty()) {
-
-
-
-        }
-
-        for (Object o : this.meetings) {
-
-            Meeting m = (Meeting) o;
-
-
-
-        }
+    public void sortMeetingList(List<Meeting> toSort) {
 
         Comparator<? super Meeting> comp = new Comparator<Meeting>() {
             @Override
@@ -668,7 +652,7 @@ public class ContactManagerImpl implements ContactManager {
             }
         };
 
-        Collections.sort(meetings, comp);  */
+        Collections.sort(toSort, (Comparator) comp);
 
     }
 
