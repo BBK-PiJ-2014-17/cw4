@@ -11,108 +11,167 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 // Utility libraries and methods
+import java.io.IOException;
+import java.nio.file.*;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Calendar;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Date;
 
+/**
+ * <h1>ContactManager Test Module</h1>
+ * <p>
+ *      The ContactManagerTest module implements a number of unit tests for the ContactManager class
+ * </p>
+ * <p>
+ *     The following tests are covered, see links for details.
+ * <ul>
+ * <li>1. <code>addFutureMeetings()</code> main {@link #testAddFutureMeeting() testAddFutureMeeting main}</li>
+ * <li>2. <code>addFutureMeeting() IllegalArgumentException</code> {@link #testAddFutureMeeting() testAddFutureMeeting IllegalArgumentException}</li>
+ * <li>3. <code>getPastMeetings</code> main {@link #testGetPastMeeting() testGetPastMeeting main}</li>
+ *
+ * </ul></p>
+ *
+ * @author Basil Mason
+ * @version 1.0.1
+ * @since 07/02/2015
+ */
 public class ContactManagerTest {
 
     // set general variables for use in any test
-    private ContactManager contactManager;              // the contact manager object to test
+    private ContactManager contactManager, contactManagerWithFile, contactManagerWithoutFile;              // the contact manager object to test
     private Contact basil, rebecca, unknown, finder;    // individual contacts to test
     private String basilString, rebeccaString, unknownString, finderString;                        // search string to find past meetings by contact
     private Set<Contact> contacts;                      // a collection of contacts for meetings
     private Calendar past, future;                      // dates for past and future meetings
+    SimpleDateFormat sdf;
 
-    // setup the test variables and environment
+    /**
+     * <code>setUp()</code>
+     * <p>
+     *     This method constructs the environment for the tests, initialising a number of variables
+     *     that will be used widely throughout the tests. This includes contacts to be used for any
+     *     meetings that are created, as well as dates for past and future meetings.
+     *
+     *     The ContactManager object itself is also initialised.
+     * </p>
+     */
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
 
-        basilString = "Basil Mason";
-        rebeccaString = "Rebecca White";
-        unknownString = "Anon";
-        finderString = "Finder";
-
-        // setup contact manager
-        contactManager = new ContactManagerImpl();
-        //contactManager.addNewContact(basil.getName(), "");      // add contact to contact manager
-        //contactManager.addNewContact(rebecca.getName(), "");    // add contact to contact manager
-        //contactManager.addNewContact(finder.getName(), "");     // add contact to contact manager
-        contactManager.addNewContact(basilString, "");
-        contactManager.addNewContact(rebeccaString, "");
-        contactManager.addNewContact(finderString, "");
-
-        // setup contacts
-        //basil = new ContactImpl("Basil Mason");                 // meeting contact
-        //rebecca = new ContactImpl("Rebecca White");             // meeting contact
-        //unknown = new ContactImpl("Anon");                      // unknown contact, not added to manager
-                                      // set string to search by
-        //finder = new ContactImpl(finderString);                 // setup contact to use in searches
-        contacts = new HashSet<Contact>();                      // collection of contacts for meetings
-        //contacts.add(basil);                                    // add contact
-        //contacts.add(rebecca);                                  // add contact
-
-        for (Contact c : contactManager.getContacts(basilString))
-            contacts.add(c);
-
-        for (Contact c : contactManager.getContacts(rebeccaString))
-            contacts.add(c);
-
-        /*for (Contact c : contactManager.getContacts(finderString)) {
-            contacts.add(c);
-            finder = c;
-        }*/
-
-        // setup dates
+        // setup generic past and future dates to be used when meetings are created.
         past = Calendar.getInstance();
         past.add(Calendar.DAY_OF_MONTH, -1);                    // date for past meeting
         future = Calendar.getInstance();
         future.add(Calendar.DAY_OF_MONTH, +1);                  // date for future meeting
 
+        // setup date formatting to be used in test methods
+        sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+
+        // setup generic contact set with contacts known to ContactManager
+        // 1. create strings for contacts
+        basilString = "Basil Mason";
+        rebeccaString = "Rebecca White";
+
+        // 2. setup the contact manager object
+        contactManager = new ContactManagerImpl();
+
+        // 3. add the new contacts to the contact manager
+        contactManager.addNewContact(basilString, "");
+        contactManager.addNewContact(rebeccaString, "");
+
+        // 4. retrieve the contacts and store in collection for future use
+        contacts = new HashSet<Contact>();
+        for (Contact c : contactManager.getContacts(basilString))
+            contacts.add(c);
+        for (Contact c : contactManager.getContacts(rebeccaString))
+            contacts.add(c);
+
     }
 
+    /**
+     * <code>tearDown()</code>
+     * <p>
+     *     This method flushes the contact manager to file for further tests. The first run of all tests will start from
+     *     a blank file, i.e. no meetings or contacts. But, future tests will load the file from any previous tests. This
+     *     continues to test the contact managers ability to store and load data, as well as work with the existing data.
+     * </p>
+     */
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
 
+        // flush contact manager
         contactManager.flush();
 
     }
 
-    // Rule for exception testing
+    // A unit testing rule to check exception handling. Initially set to type none.
     @Rule
     public ExpectedException thrown = ExpectedException.none();
 
     /**
-     * addFutureMeetings Tests
-     * Required tests:
-     *      - add meeting and return id
-     *      - add multiple meetings and check uniqueness of ids
-     *      - check for IllegalArgumentException if meeting set in the past
-     *      - check for IllegalArgumentException if contact unknown to the contact manager
+     * <code>testAddFutureMeeting()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#addFutureMeeting addFutureMeeting} method and its
+     *     main functionality. The method should add a meeting to to be held in future to the contact manager's internal
+     *     list of meetings. This meeting should also receive a unique id.
+     * </p>
      */
-    @Ignore           // TESTED
-    public void testAddFutureMeeting() throws Exception {
+    @Ignore
+    public void testAddFutureMeeting() {
 
+        // two future meetings are added and their IDs stored
         int m1 = contactManager.addFutureMeeting(contacts, future); // add first meeting
-        future.add(Calendar.DAY_OF_MONTH, +1);                      // move meeting date
         int m2 = contactManager.addFutureMeeting(contacts, future); // add second meeting
 
-        assertTrue(m1 != m2);   // check meeting ids are unique
+        // check that the meeting ids are unique
+        assertTrue(m1 != m2);
 
-    }
+        // check that the meetings exist in the contact manager
+        FutureMeeting fm1 = contactManager.getFutureMeeting(m1);
+        FutureMeeting fm2 = contactManager.getFutureMeeting(m2);
 
-    @Ignore           // TESTED
-    public void testAddFutureMeetingThrowsIllegalArgumentException() {
-
-        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
-        contactManager.addFutureMeeting(contacts, past);    // due to meeting in past
-
-        contacts.add(unknown);  // add contact unknown to contact manager to set of contacts for meeting
-        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
-        contactManager.addFutureMeeting(contacts, future);    // due to unknown contact
+        assertTrue(fm1 != null);    // confirm meeting one return is not null
+        assertTrue(fm2 != null);    // confirm meeting two return is not null
 
     }
 
     /**
+     * <code>testAddFutureMeeting() IllegalArgumentException</code> test
+     * <p>
+     *     This test attempts to create a future meeting with a past date, and a future meeting with
+     *     contacts unknown to the contact manager. In both cases, a IllegalArgumentException should
+     *     be thrown.
+     * </p>
+     */
+    @Ignore
+    public void testAddFutureMeetingThrowsIllegalArgumentException() {
+
+        // check future meeting create with past date
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.addFutureMeeting(contacts, past);    // due to meeting in past
+
+        // check future meeting created with contact unknown to contact manager
+        contacts.add(new ContactImpl("Unknown Contact"));   // add contact unknown to contact manager to set of contacts for meeting
+        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
+        contactManager.addFutureMeeting(contacts, future);  // due to unknown contact
+
+    }
+
+    /**
+     * <code>testGetPastMeeting()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#getPastMeeting getPastMeeting} method and its
+     *     main functionality. The method should return a past meeting given an id or null if there is not one.
+     *
+     *     This method is tested in 3 ways. 1. adding a new future meeting and waiting until it is a past meeting,
+     *     checking the conversion to past meeting works, 2. adding a new past meeting directly (this requires a method
+     *     for identifying the new past meeting as the contact manager does not return an id from this method, so some
+     *     searching is done on a unique contact and meeting notes string), 3. that null is returned if the meeting does
+     *     not exist.
+     * </p>
      * getPastMeeting Tests
      * Required tests:
      *      - get past meeting by id
@@ -120,38 +179,41 @@ public class ContactManagerTest {
      *      - check null is returned if no meeting present with that id
      *      - check for IllegalArgumentException if meeting set in the future
      */
-    @Ignore           // TESTED
-    public void testGetPastMeeting() throws Exception {
+    @Test
+    public void testGetPastMeeting() {
 
-        PastMeeting pm;
-        int pastMeetingId;
+        PastMeeting pm;     // past meeting to be found
+        int pastMeetingId;  // id of past meeting to be found
 
         // method 1, setup future meeting and wait until it is a past meeting
         // then search by id
-        pastMeetingId = setupPastMeeting(contacts);     // setup meeting in past
+        // this is necessary to confirm that future meetings convert to past meetings correctly
+        pastMeetingId = setupPastMeeting(contacts);         // setup meeting in past using internal method
         pm = contactManager.getPastMeeting(pastMeetingId);  // get past meeting by id
-        assertEquals(pastMeetingId, pm.getId());            // test IDs the same
+        assertEquals(pastMeetingId, pm.getId());            // test the id of the returned meeting is in fact the correct id
 
-        // method 2, setup new past meeting directly, with unique contact to search by
+        // method 2, setup a new past meeting directly
+        // contact manager does not return ids from newPastMeeting, so other identification method required
+        // meeting setup with with unique contact and notes to search by
+        String uniqueNotes = sdf.format(new Date()).toString();             // prepare a string of unique notes to inspect meeting by
+        int c1 = generateUniqueContactForMeetings(uniqueNotes);             // call internal method to generate unique contact
+        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];  // find unique contact, one expected
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
-        int c1 = generateUniqueContactForMeetings(n1);
-        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];
-
+        // create contact collection with unique contact to create meeting with
         Set<Contact> cs = new HashSet<Contact>();
-        cs.add(c);
+        cs.add(c);  // add unique contact
 
-        contactManager.addNewPastMeeting(cs, past, n1);
+        // create new past meeting directly with unique notes
+        contactManager.addNewPastMeeting(cs, past, uniqueNotes);
 
+        // get list of past meetings based on unique contact
         List<PastMeeting> pms = contactManager.getPastMeetingList(c);
 
-        for (PastMeeting m : pms) {
+        // one meeting expected in list with unique contact, set as past meeting
+        pm = contactManager.getPastMeeting(pms.get(0).getId());
 
-            String notes = m.getNotes();
-
-            assertTrue(n1.equals(notes));
-        }
+        // check unique notes on meeting confirms meeting added to contact manager
+        assertTrue(uniqueNotes.equals(pm.getNotes()));
 
         // test null returned if meeting does not exist
         assertTrue(contactManager.getPastMeeting(99999) == null);
@@ -374,7 +436,7 @@ public class ContactManagerTest {
 
     }
 
-    @Test
+    @Ignore
     public void testGetFutureMeetingListChronology() throws Exception {
 
         Calendar date1 = Calendar.getInstance();
@@ -858,22 +920,52 @@ public class ContactManagerTest {
 
     }
 
+    /**
+     * <code>generateUniqueContactForMeetings()</code> internal method
+     * <p>
+     *     This method creates a new contact a new contact and adds it to the contact manager. It then finds the contact
+     *     by the unique notes passed to the method, and retrieves the id of the contact. This id is then returned.
+     *
+     *     Between the returned id and the contact notes, any tests methods will be able to verify unique contacts
+     *     and use them to search for meetings using the contact manager api.
+     *
+     *     Uniqueness is assumed when the string is provided. The string cannot be generated within this method as tests
+     *     will also need this string for further validation in tests.
+     * </p>
+     *
+     * @param notes a unique string to be provided, used for searching for the contact
+     * @return id of the new contact to be used to search for meetings
+     */
     private int generateUniqueContactForMeetings(String notes) {
 
-        String name = "DEFAULT";
-        contactManager.addNewContact(name, notes);
+        // create new contact in contact manager
+        String name = "FINDER";                     // with default name
+        contactManager.addNewContact(name, notes);  // and unique notes to be identified by
+
+        // return value, by default zero but assigned to contact id when found
         int ret = 0;
 
+        // find all contacts with FINDER name
         Set<Contact> cs = contactManager.getContacts(name);
 
+        // loop through collection of contacts and location contact based on unique notes string
         for (Contact c : cs) {
-
-            if (c.getNotes().equals(notes))
-                ret = c.getId();
-
+            if (c.getNotes().equals(notes))     // check contact has the unique notes
+                ret = c.getId();                // get the id of the contact that has the unique notes
         }
 
+        // return the contact id
         return ret;
+    }
+
+    private Set<Contact> generateContactSetForMeeting() {
+
+        Set<Contact> ret = new HashSet<Contact>();
+
+        //ret.add(contactManager.getContacts(generateUniqueContactForMeetings()))
+
+        return ret;
+
     }
 
 }

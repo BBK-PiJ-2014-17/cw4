@@ -55,7 +55,7 @@ public class ContactManagerImpl implements ContactManager {
         return CM_ID;
     }
 
-    // constructor
+    /* C O N S T R U C T O R */
 
     public ContactManagerImpl() {
 
@@ -193,52 +193,88 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    /* I N T E R F A C E   M E T H O D S */
+
+    /**
+     * <code>addFutureMeeting</code>
+     * {@inheritDoc}
+     * <p>
+     *     After checking that the contacts for the meeting are known to the contact manager
+     *     and that the date is in the future, this methods creates a new instance of a future meeting
+     *     and adds it to the internal list of meetings
+     * </p>
+     *
+     * @return a unique id
+     */
     @Override
     public int addFutureMeeting(Set<Contact> contacts, Calendar date) {
 
-        Calendar now = Calendar.getInstance();
-        if (now.compareTo(date) > 0)    // past meeting date
-            throw new IllegalArgumentException();
+        // check date for meeting is a future date
+        Calendar now = Calendar.getInstance();      // get time as at now
+        if (now.compareTo(date) > 0)                // compare the argument date against now
+            throw new IllegalArgumentException();   // if now is greater than the meeting date, an exception is thrown
 
-        if (!checkContactsExist(contacts))
-            throw new IllegalArgumentException();
+        // check contacts are known to contact manager
+        if (!checkContactsExist(contacts))          // call internal method to verify contacts
+            throw new IllegalArgumentException();   // if false returned, throw exception
 
-        int id = uniqueId();
+        // if all exceptions are passed, generate a unique id for the meeting
+        int id = uniqueId();    // call internal method to generate unique id
 
+        // create new instance of future meeting and add to internal list of meetings
         FutureMeeting fm = new FutureMeetingImpl(id, date, contacts);
         meetings.add(fm);
 
+        // return the id of the new future meeting
         return id;
     }
 
+    /**
+     * <code>getPastMeeting</code>
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a past meeting given an id. If the id does not exist, <code>null</code>
+     *     is returned. Or, if the id relates to a future meeting, an <code>IllegalArgumentException</code>
+     *     exception is thrown.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     * </p>
+     *
+     * @return past meeting based on unique id, or null
+     */
     @Override
     public PastMeeting getPastMeeting(int id) {
 
+        // past meeting to be returned, initialised to null
         PastMeeting ret = null;
 
-        updateMeetingTypes();   // update any future meetings
+        // call internal method to update any future meetings that are now in the past
+        updateMeetingTypes();
 
+        // scan internal list of meetings
         for (Object m : meetings) {
 
+            // if the meeting is a past meeting, check the id and return if found
             if (m instanceof PastMeeting) {
 
-                PastMeeting pm = (PastMeeting) m;
+                PastMeeting pm = (PastMeeting) m;   // cast to past meeting to get id
+                if (pm.getId() == id)               // check id
+                    ret = pm;                       // set return object if meeting found
 
-                if (pm.getId() == id) {
-                    ret = pm;
-                }
+            // if the meeting is a future meeting, check id and throw exception if found
             } else if (m instanceof FutureMeeting) {
 
-                FutureMeeting fm = (FutureMeeting) m;
-
-                if (fm.getId() == id) {
-                    throw new IllegalArgumentException();
-                }
+                FutureMeeting fm = (FutureMeeting) m;       // cast to future meeting to get id
+                if (fm.getId() == id)                       // check id
+                    throw new IllegalArgumentException();   // thrown exception if found
 
             }
 
         }
 
+        // return past meeting or null
         return ret;
     }
 
@@ -490,12 +526,18 @@ public class ContactManagerImpl implements ContactManager {
     @Override
     public void flush() {
 
+        //File contactsXml = new File(filePath);
         Document output;
         Element managerRoot, contactRoot, meetingRoot;
         DocumentBuilderFactory docFactory;
         DocumentBuilder docBuilder;
 
         try {
+/*
+
+            if(!contactsXml.exists())            // if file doesn't already exist
+                contactsXml.createNewFile();        // create the file
+*/
 
             docFactory = DocumentBuilderFactory.newInstance();
             docBuilder = docFactory.newDocumentBuilder();
@@ -570,7 +612,9 @@ public class ContactManagerImpl implements ContactManager {
             pce.printStackTrace();
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
-        }
+        }/* catch (IOException ioe) {
+            ioe.printStackTrace();
+        }*/
 
     }
 
