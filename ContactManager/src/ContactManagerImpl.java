@@ -278,37 +278,69 @@ public class ContactManagerImpl implements ContactManager {
         return ret;
     }
 
+    /**
+     * <code>getFutureMeeting</code>
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a future meeting given an id. If the id does not exist, <code>null</code>
+     *     is returned. Or, if the id relates to a past meeting, an <code>IllegalArgumentException</code>
+     *     exception is thrown.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     * </p>
+     *
+     * @return future meeting based on unique id, or null
+     */
     @Override
     public FutureMeeting getFutureMeeting(int id) {
 
+        // past meeting to be returned, initialised to null
         FutureMeeting ret = null;
 
-        updateMeetingTypes();   // update any future meetings
+        // call internal method to update any future meetings that are now in the past
+        updateMeetingTypes();
 
+        // scan internal list of meetings
         for (Object m : meetings) {
 
+            // if the meeting is a future meeting, check the id and return if found
             if (m instanceof FutureMeeting) {
 
-                FutureMeeting fm = (FutureMeeting) m;
+                FutureMeeting fm = (FutureMeeting) m;   // cast to future meeting to get id
+                if (fm.getId() == id)                   // check id
+                    ret = fm;                           // set return object if meeting found
 
-                if (fm.getId() == id) {
-                    ret = fm;
-                }
+            // if the meeting is a past meeting, check id and throw exception if found
             } else if (m instanceof PastMeeting) {
 
-                PastMeeting pm = (PastMeeting) m;
-
-                if (pm.getId() == id) {
-                    throw new IllegalArgumentException();
-                }
+                PastMeeting pm = (PastMeeting) m;           // cast to future meeting to get id
+                if (pm.getId() == id)                       // check id
+                    throw new IllegalArgumentException();   // thrown exception if found
 
             }
 
         }
 
+        // return past meeting or null
         return ret;
     }
 
+    /**
+     * <code>getMeeting</code>
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a meeting given an id. If the id does not exist, <code>null</code>
+     *     is returned.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     * </p>
+     *
+     * @return future meeting based on unique id, or null
+     */
     @Override
     public Meeting getMeeting(int id) {
 
@@ -316,39 +348,63 @@ public class ContactManagerImpl implements ContactManager {
 
         updateMeetingTypes();   // update any future meetings
 
+        // scan internal meeting list
         for (Object o : meetings) {
 
-            m = (Meeting) o;
-
-            if (m.getId() == id)
-                ret = m;
+            m = (Meeting) o;        // cast to meeting to get id
+            if (m.getId() == id)    // check id
+                ret = m;            // set return object if id found
 
         }
 
+        // return meeting or null
         return ret;
     }
 
+    /**
+     * <code>getFutureMeetingList(Contact)</code>
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a list of future meetings given a contact. If no meetings exists, an empty list is
+     *     returned.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     *
+     *     Furthermore, the list of meetings to be returned is sorted into chronological order. See method
+     *     {@link #sortMeetingList(List) sortMeetingList}.
+     * </p>
+     *
+     * @return list of future meetings based on contact, or an empty list.
+     */
     @Override
     public List<Meeting> getFutureMeetingList(Contact contact) {
 
+        // if the contact is unknown to the contact manager, throw an exception
         if (!checkContactExists(contact))
             throw new IllegalArgumentException();
 
-        updateMeetingTypes();   // update any future meetings
+        // update any future meetings that are now in the past
+        updateMeetingTypes();
 
+        // list of meetings to be returned
         List<Meeting> ret = new ArrayList<Meeting>();
 
+        // scan internal list of meetings
         for (Object o : meetings) {
 
+            // if the meeting is a future meeting
             if (o instanceof FutureMeeting) {
 
-                Meeting m = (Meeting) o;
-                Set<Contact> cs = m.getContacts();
+                Meeting m = (Meeting) o;            // cast to meeting to access contacts
+                Set<Contact> cs = m.getContacts();  // get contacts
 
+                // scan meeting contacts for given contact id
                 for (Contact c : cs) {
 
-                    if (contact.getId() == c.getId())
-                        ret.add(m);
+                    if (contact.getId() == c.getId())   // if the contact is present in this meeting
+                        ret.add(m);                     // add the meeting to the return list
 
                 }
 
@@ -356,27 +412,52 @@ public class ContactManagerImpl implements ContactManager {
 
         }
 
+        // sort the return list in chronological order
         sortMeetingList(ret);
 
+        // return list of meetings, or an empty list
         return ret;
     }
 
+    /**
+     * <code>getFutureMeetingList(Calendar)</code>
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a list of future meetings given a date. If no meetings exists, an empty list is
+     *     returned.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     *
+     *     Furthermore, the list of meetings to be returned is sorted into chronological order. See method
+     *     {@link #sortMeetingList(List) sortMeetingList}.
+     * </p>
+     *
+     * @return list of future meetings based on contact, or an empty list.
+     */
     @Override
     public List<Meeting> getFutureMeetingList(Calendar date) {
 
-        updateMeetingTypes();   // update any future meetings
+        // update any future meetings
+        updateMeetingTypes();
 
+        // return list of meetings
         List<Meeting> ret = new ArrayList<Meeting>();
 
+        // scan internal list of meetings
         for (Object o : meetings) {
 
-            Meeting m = (Meeting) o;
-
-            if (m.getDate().compareTo(date) == 0)
-                ret.add(m);
+            Meeting m = (Meeting) o;                // cast to meeting to access date
+            if (m.getDate().compareTo(date) == 0)   // if dates are the same
+                ret.add(m);                         // add to return list
 
         }
 
+        // sort return list chronologically
+        sortMeetingList(ret);
+
+        // return list of meetings, or empty list
         return ret;
 
     }
