@@ -494,18 +494,32 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    /**
+     * <code>addNewPastMeeting()</code>
+     * {@inheritDoc}
+     * <p>
+     *     After checking that none of the arguments are null, the contacts are known
+     *     to the contact manager, and that the contact collection is not empty,
+     *     this method adds a new past meeting to the internal list of meetings.
+     *
+     * </p>
+     */
     @Override
     public void addNewPastMeeting(Set<Contact> contacts, Calendar date, String text) {
 
+        // check none of the arguments are null
         if (contacts == null || date == null || text == null)
             throw new NullPointerException();
 
+        // check the contacts collection is not empty
         if (contacts.isEmpty())
             throw new IllegalArgumentException();
 
+        // check that all contacts are known to the contact manager
         if (!checkContactsExist(contacts))
             throw new IllegalArgumentException();
 
+        // add a new past meeting to the internal list of meetings
         this.meetings.add(new PastMeetingImpl(uniqueId(), date, contacts, text));
 
     }

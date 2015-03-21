@@ -26,13 +26,19 @@ import java.util.*;
  * <ul>
  * <li>1. <code>addFutureMeetings()</code> main test: {@link #testAddFutureMeeting() testAddFutureMeeting main}</li>
  * <li>2. <code>addFutureMeeting() IllegalArgumentException</code> test: {@link #testAddFutureMeetingThrowsIllegalArgumentException() testAddFutureMeeting IllegalArgumentException}</li>
- * <li>3. <code>getPastMeetings</code> main test: {@link #testGetPastMeeting() testGetPastMeeting main}</li>
+ * <li>3. <code>getPastMeetings()</code> main test: {@link #testGetPastMeeting() testGetPastMeeting main}</li>
  * <li>4. <code>getPastMeetings() IllegalArgumentException</code> test: {@link #testGetPastMeetingThrowsIllegalArgumentException() testGetPastMeeting IllegalArgumentException}</li>
- * <li>5. <code>getFutureMeeting</code> main test: {@link #testGetFutureMeeting() testGetFutureMeeting main}</li>
+ * <li>5. <code>getFutureMeeting()</code> main test: {@link #testGetFutureMeeting() testGetFutureMeeting main}</li>
  * <li>6. <code>getFutureMeeting() IllegalArgumentException</code> test: {@link #testGetFutureMeetingThrowsIllegalArgumentException() testGetFutureMeeting IllegalArgumentException}</li>
- * <li>7. <code>getMeeting</code> main test: {@link #testGetMeeting() testGetMeeting main}</li>
- * <li>8. <code>getFutureMeetingList</code> by contact test: {@link #testGetFutureMeetingListByContact() testGetFutureMeetingListByContact}</li>
+ * <li>7. <code>getMeeting()</code> main test: {@link #testGetMeeting() testGetMeeting main}</li>
+ * <li>8. <code>getFutureMeetingList()</code> by contact test: {@link #testGetFutureMeetingListByContact() testGetFutureMeetingListByContact}</li>
  * <li>9. <code>getFutureMeetingList()</code> by contact <code>IllegalArgumentException</code> test: {@link #testGetFutureMeetingListByContactThrowsIllegalArgumentException() testGetFutureMeetingListByContact IllegalArgumentException}</li>
+ * <li>11. <code>getPastMeetingList()</code> main test: {@link #testGetPastMeetingList() testGetPastMeetingList main}</li>
+ * <li>12. <code>getPastMeetingList() IllegalArgumentException</code> test: {@link #testGetPastMeetingListThrowsIllegalArgumentException() testGetPastMeetingList IllegalArgumentException}</li>
+ * <li>13. <code>addNewPastMeeting()</code> main test: {@link #testAddNewPastMeeting() testAddNewPastMeeting main}</li>
+ * <li>14. <code>addNewPastMeeting() IllegalArgumentException</code> test: {@link #testAddNewPastMeetingThrowsIllegalArgumentException() testAddNewPastMeeting IllegalArgumentException}</li>
+ * <li>15. <code>addNewPastMeeting() NullPointerException</code> test: {@link #testAddNewPastMeetingThrowsNullPointerException() testAddNewPastMeeting NullPointerException}</li>
+ *
  *
  * </ul></p>
  *
@@ -287,7 +293,7 @@ public class ContactManagerTest {
      * </p>
      */
     @Ignore
-    public void testGetMeeting() throws Exception {
+    public void testGetMeeting() {
 
         int meetingId;  // meeting id to be found
         Meeting m;      // meeting to be found
@@ -342,7 +348,7 @@ public class ContactManagerTest {
      * </p>
      */
     @Ignore
-    public void testGetFutureMeetingListByContact() throws Exception {
+    public void testGetFutureMeetingListByContact() {
 
         // create a unique contact with no meetings
         String uniqueNotes = sdf.format(new Date()).toString();
@@ -425,13 +431,13 @@ public class ContactManagerTest {
      *     This method tests the contact manager's {@link ContactManager#getFutureMeetingList(Calendar) getFutureMeetingList by date}
      *     method and its search by date overload. The method should return a list of future meetings, sorted in
      *     chronological order, with no duplicates, on the given date. An empty list is returned if no
-     *     meeting with the given contact exists.
+     *     meeting on the given date exists.
      *
      *     Check no past meetings are returned, or meetings on different dates.
      * </p>
      */
     @Ignore
-    public void testGetFutureMeetingListByDate() throws Exception {
+    public void testGetFutureMeetingListByDate() {
 
         // pick random date in the future
         future.add(Calendar.DAY_OF_MONTH, +110);
@@ -481,8 +487,16 @@ public class ContactManagerTest {
 
     }
 
-
-
+    /**
+     * 11. <code>testGetPastMeetingList()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#getPastMeetingList() getPastMeetingList}
+     *     method. The method should return a list of past meetings, sorted in chronological order, with no duplicates,
+     *     based on the a given contact. An empty list is returned if no meeting with the given contact exists.
+     *
+     *     Check no future meetings are returned, or meetings on without the given contact.
+     * </p>
+     */
     /**
      * getPastMeetingList Tests
      * Required tests:
@@ -493,28 +507,25 @@ public class ContactManagerTest {
      *      - confirm chronology of returned list
      *      - check for IllegalArgumentException if contact unknown to contact manager
      */
-    @Ignore         // TESTED (needs improving) --  retest
+    @Ignore     // RE-TEST
     public void testGetPastMeetingList() throws Exception {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
+        // setup unique contact
+        String uniqueNotes = sdf.format(new Date()).toString();
+        Set<Contact> cs = contactManager.getContacts(generateUniqueContactForMeetings(uniqueNotes));
+        Contact c = (Contact) cs.toArray()[0];
 
-        Set<Contact> cs = contactManager.getContacts(generateUniqueContactForMeetings(n1));
-        Contact n = (Contact) cs.toArray()[0];
+        // no meetings added with this contact, expect empty list
+        assertTrue(contactManager.getPastMeetingList(c).size() == 0);
+
 
         PastMeeting pm;
 
-        assertTrue(contactManager.getPastMeetingList(n).size() == 0);      // no meetings added, expect empty list
 
         contactManager.addNewPastMeeting(cs, past, "");                   // add new past meeting directly
-        pm = contactManager.getPastMeetingList(n).get(0);                   // return the past meeting based on basil contact
+        pm = contactManager.getPastMeetingList(c).get(0);                   // return the past meeting based on basil contact
         int meeting1Id = pm.getId();                                            // get id of past meeting
 
-        //int meeting2Id = setupPastMeeting(cs);                            // setup future-turned-past meeting with basil
-        //int meeting3Id = setupPastMeeting(cs);                            // setup future-turned-past meeting with basil
-
-        //Set<Contact> otherContacts = new HashSet<Contact>();                    // setup contact collection not including basil
-        //otherContacts.add(finder);
 
         String n2 = sdf.format(new Date()).toString();
 
@@ -528,7 +539,7 @@ public class ContactManagerTest {
         //int meeting5Id = setupPastMeeting(contacts);                       // setup future-turned-past meeting without basil
         int meeting6Id = contactManager.addFutureMeeting(contacts, future);     // add future meeting
 
-        List<PastMeeting> meetings = contactManager.getPastMeetingList(n);  // get meetings
+        List<PastMeeting> meetings = contactManager.getPastMeetingList(c);  // get meetings
 
         // check list contains expected meetings
         PastMeeting meeting1 = (PastMeeting) contactManager.getMeeting(meeting1Id); // direct past meeting with basil
@@ -558,58 +569,67 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    /**
+     * 12. <code>testGetPastMeetingList() IllegalArgumentException</code> test
+     * <p>
+     *     This test attempts to get a list of meetings for a contact that is unknown to the contact manager.
+     *     An IllegalArgumentException should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testGetPastMeetingListThrowsIllegalArgumentException() throws Exception {
 
-        thrown.expect(IllegalArgumentException.class);      // expect invalid argument exception
-        contactManager.getPastMeetingList(new ContactImpl(9999, "Anon"));         // due to unknown contact
+        thrown.expect(IllegalArgumentException.class);                      // expect invalid argument exception
+        contactManager.getPastMeetingList(new ContactImpl(9999, "Anon"));   // due to unknown contact
 
     }
 
     /**
-     * addNewPastMeeting Tests
-     * Required tests:
-     *      - add new past meeting
-     *      - check meeting added by contact search
-     *      - check for IllegalArgumentException if contact unknown to contact manager
-     *      - check for IllegalArgumentException if contacts empty
-     *      - check for NullPointerException if any input is null
+     * 13. <code>testAddNewPastMeeting()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#addNewPastMeeting addNewPastMeeting} method and its
+     *     main functionality. The method should add a meeting to to be held in past to the contact manager's internal
+     *     list of meetings.
+     * </p>
      */
-    @Ignore             // TESTED
-    public void testAddNewPastMeeting() throws Exception {
+    @Ignore
+    public void testAddNewPastMeeting() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
-        String pastMeetingNotes = "blah blah" + n1;  // meeting notes to check
-
-        int c1 = generateUniqueContactForMeetings(n1);
+        // setup unique contact to search by
+        String pastMeetingNotes = sdf.format(new Date()).toString();
+        int c1 = generateUniqueContactForMeetings(pastMeetingNotes);
         Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];
 
+        // setup collection containing unique contact
         Set<Contact> cs = new HashSet<Contact>();
         cs.add(c);
 
-        contactManager.addNewPastMeeting(cs, past, pastMeetingNotes);     // add new past meeting
+        // add new past meeting with unique contact and notes
+        contactManager.addNewPastMeeting(cs, past, pastMeetingNotes);
 
+        // get all meetings with unique contacts
         List<PastMeeting> pms = contactManager.getPastMeetingList(c);
 
-        for (PastMeeting pm : pms) {
-
-            String notes = pm.getNotes();
-
-            assertTrue(pastMeetingNotes.equals(notes));
-        }
+        // check meeting exists with unique notes
+        assertTrue(pastMeetingNotes.equals(pms.get(0).getNotes()));
 
     }
 
-    @Ignore               // TESTED
+    /**
+     * 14. <code>testAddNewPastMeeting() IllegalArgumentException</code> test
+     * <p>
+     *     This test attempts to get create a new past meeting with an invalid contact collection: either
+     *     empty, or containing contacts unknown to the contact manager. An IllegalArgumentException should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
 
-        //contacts.add(new ContactImpl(99999, "Anon"));
-
+        // create collection of contacts with contact unknown to contact manager
         Set<Contact> cs = new HashSet<Contact>();
         cs.add(new ContactImpl(99999, "Anon"));
 
-        thrown.expect(IllegalArgumentException.class);                // expect illegal argument exception
+        thrown.expect(IllegalArgumentException.class);          // expect illegal argument exception
         contactManager.addNewPastMeeting(cs, past, "");         // due to unknown contact
 
         thrown.expect(IllegalArgumentException.class);                          // expect illegal argument exception
@@ -617,7 +637,14 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore               // TESTED
+    /**
+     * 15. <code>testAddNewPastMeeting() NullPointerException</code> test
+     * <p>
+     *     This test attempts to get create a new past meeting with invalid arguments, i.e. <code>null</code>. A
+     *     NullPointerException should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testAddNewPastMeetingThrowsNullPointerException() throws Exception {
 
         thrown.expect(NullPointerException.class);              // expect null pointer exception
