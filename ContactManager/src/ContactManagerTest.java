@@ -11,8 +11,6 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 // Utility libraries and methods
-import java.io.IOException;
-import java.nio.file.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -33,7 +31,7 @@ import java.util.*;
  * <li>7. <code>getMeeting()</code> main test: {@link #testGetMeeting() testGetMeeting main}</li>
  * <li>8. <code>getFutureMeetingList()</code> by contact test: {@link #testGetFutureMeetingListByContact() testGetFutureMeetingListByContact}</li>
  * <li>9. <code>getFutureMeetingList()</code> by contact <code>IllegalArgumentException</code> test: {@link #testGetFutureMeetingListByContactThrowsIllegalArgumentException() testGetFutureMeetingListByContact IllegalArgumentException}</li>
- * <li>11. ***<code>getPastMeetingList()</code> main test: {@link #testGetPastMeetingList() testGetPastMeetingList main}</li>
+ * <li>11. <code>getPastMeetingList()</code> main test: {@link #testGetPastMeetingList() testGetPastMeetingList main}</li>
  * <li>12. <code>getPastMeetingList() IllegalArgumentException</code> test: {@link #testGetPastMeetingListThrowsIllegalArgumentException() testGetPastMeetingList IllegalArgumentException}</li>
  * <li>13. <code>addNewPastMeeting()</code> main test: {@link #testAddNewPastMeeting() testAddNewPastMeeting main}</li>
  * <li>14. <code>addNewPastMeeting() IllegalArgumentException</code> test: {@link #testAddNewPastMeetingThrowsIllegalArgumentException() testAddNewPastMeeting IllegalArgumentException}</li>
@@ -46,9 +44,9 @@ import java.util.*;
  * <li>21. <code>addNewContact() NullPointerException</code> test: {@link #testAddNewContactThrowsNullPointerException() testAddNewContact NullPointerException}</li>
  * <li>22. <code>getContacts()</code> by id test: {@link #testGetContactsById() testGetContacts by id}</li>
  * <li>23. <code>getContacts()</code> by id <code>IllegalArgumentException</code> test: {@link #testGetContactsByIdThrowsIllegalArgumentException() testGetContacts by id IllegalArgumentException}</li>
- * <li>24. </li>
+ * <li>24. <code>getContacts()</code> by name test: {@link #testGetContactsByName() testGetContacts by name}</li>
  * <li>25. <code>getContacts()</code> by name <code>NullPointerException</code> test: {@link #testGetContactsByNameThrowsNullPointerException() testGetContacts by name NullPointerException}</li>
- * <li>26. </li>
+ * <li>26. <code>flush()</code> main test: {@link #testFlush() testFlush main}</li>
  * </ul></p>
  *
  * @author Basil Mason
@@ -499,24 +497,14 @@ public class ContactManagerTest {
     /**
      * 11. <code>testGetPastMeetingList()</code> main test
      * <p>
-     *     This method tests the contact manager's {@link ContactManager#getPastMeetingList() getPastMeetingList}
+     *     This method tests the contact manager's {@link ContactManager#getPastMeetingList(Contact) getPastMeetingList}
      *     method. The method should return a list of past meetings, sorted in chronological order, with no duplicates,
      *     based on the a given contact. An empty list is returned if no meeting with the given contact exists.
      *
      *     Check no future meetings are returned, or meetings on without the given contact.
      * </p>
      */
-    /**
-     * getPastMeetingList Tests
-     * Required tests:
-     *      - get list of past meetings based on contact
-     *      - check list is empty if no meetings present with that contact
-     *      - check list contains all meetings expected with given contact
-     *      - check future meetings not returned
-     *      - confirm chronology of returned list
-     *      - check for IllegalArgumentException if contact unknown to contact manager
-     */
-    @Ignore     // RE-TEST
+    @Ignore
     public void testGetPastMeetingList() throws Exception {
 
         // setup unique contact
@@ -527,54 +515,32 @@ public class ContactManagerTest {
         // no meetings added with this contact, expect empty list
         assertTrue(contactManager.getPastMeetingList(c).size() == 0);
 
+        // add past meetings with unique contact
+        contactManager.addNewPastMeeting(cs, past, "");
+        contactManager.addNewPastMeeting(cs, past, "");
+        Calendar otherPast = Calendar.getInstance();
+        otherPast.add(Calendar.DAY_OF_MONTH, -120);
+        contactManager.addNewPastMeeting(cs, otherPast, "");
 
-        PastMeeting pm;
+        // add future meeting with contact
+        int fmid = contactManager.addFutureMeeting(cs, future);
 
+        // add past meeting without unique contact
+        int pmid = setupPastMeeting(contacts);
 
-        contactManager.addNewPastMeeting(cs, past, "");                   // add new past meeting directly
-        pm = contactManager.getPastMeetingList(c).get(0);                   // return the past meeting based on basil contact
-        int meeting1Id = pm.getId();                                            // get id of past meeting
+        // get list of past meetings with unique contact
+        List<PastMeeting> pms = contactManager.getPastMeetingList(c);
 
+        // expect 3 meetings
+        assertTrue(pms.size() == 3);
 
-        String n2 = sdf.format(new Date()).toString();
+        // check future meeting, and meeting without contact, not contained
+        for (PastMeeting pm : pms) {
+            assertTrue(pm.getId() != pmid || pm.getId() != fmid);
+        }
 
-        Set<Contact> cs2 = contactManager.getContacts(generateUniqueContactForMeetings(n2));
-        Contact contact2 = (Contact) cs2.toArray()[0];
-
-        contactManager.addNewPastMeeting(cs2, past, "");              // add new past meeting directly, without basil
-        pm = contactManager.getPastMeetingList(contact2).get(0);                  // return the past meeting based on finder contact
-        int meeting4Id = pm.getId();                                            // get id of past meeting
-
-        //int meeting5Id = setupPastMeeting(contacts);                       // setup future-turned-past meeting without basil
-        int meeting6Id = contactManager.addFutureMeeting(contacts, future);     // add future meeting
-
-        List<PastMeeting> meetings = contactManager.getPastMeetingList(c);  // get meetings
-
-        // check list contains expected meetings
-        PastMeeting meeting1 = (PastMeeting) contactManager.getMeeting(meeting1Id); // direct past meeting with basil
-        //PastMeeting meeting2 = (PastMeeting) contactManager.getMeeting(meeting2Id); // future-turned-past meeting with basil
-        //PastMeeting meeting3 = (PastMeeting) contactManager.getMeeting(meeting3Id); // future-turned-past meeting with basil
-        PastMeeting meeting4 = (PastMeeting) contactManager.getMeeting(meeting4Id); // direct past meeting without basil
-        //PastMeeting meeting5 = (PastMeeting) contactManager.getMeeting(meeting5Id); // future-turned-past meeting without basil
-        FutureMeeting meeting6 = (FutureMeeting) contactManager.getMeeting(meeting6Id); // future meeting with basil
-
-        Set<PastMeeting> expectedMeetings = new HashSet<PastMeeting>(); // expect only 3 of 6 meetings returned
-        expectedMeetings.add(meeting1);
-        //expectedMeetings.add(meeting2);
-        //expectedMeetings.add(meeting3);
-
-        Set<Matcher<PastMeeting>> matcher = new HashSet<Matcher<PastMeeting>>();    // setup hamcrest matcher
-        for(PastMeeting m: expectedMeetings)                                        // that checks for the property values of each Meeting
-            matcher.add(new SamePropertyValuesAs(m));
-        for (Matcher<PastMeeting> mf : matcher)                                     // confirm that expected meetings are in returned collection
-            assertThat(meetings, hasItem(mf));
-
-        assertThat(meetings, IsCollectionWithSize.hasSize(expectedMeetings.size()));    // confirm size of returned collection
-        assertThat(meetings, not(hasItem(meeting4)));                                   // confirm return does not contain meeting without basil
-        //assertThat(meetings, not(hasItem(meeting5)));                                   // confirm return does not contain meeting without basil
-        //assertThat(meetings, not(hasItem(meeting6)));                                   // confirm return does not contain meeting future meeting
-
-        //assertTrue(checkChronologyOfListPast(meetings)); // confirm all meetings were in date order
+        // confirm all meetings were in date order
+        assertTrue(checkChronologyOfListPast(pms));
 
     }
 
@@ -859,7 +825,7 @@ public class ContactManagerTest {
     }
 
     /**
-     * 24. <code>testGetContactsByName()</code> by name test
+     * 24. <code>testGetContacts()</code> by name test
      * <p>
      *     This method tests the contact manager's {@link ContactManager#getContacts(String) getContacts(String)} by name method
      *     and its main functionality. This method should retrieve a collection of contacts based on name. It should
@@ -867,34 +833,35 @@ public class ContactManagerTest {
      * </p>
      */
     @Ignore
-    public void testGetContactsByName() throws Exception {
+    public void testGetContactsByName() {
 
-        String contactName = "New Contact";
+        String contactName = "New Contact";                         // new contact name
+        String uniqueString = sdf.format(new Date()).toString();    // a unique string
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
+        String contactNotes1 = "New Notes 1" + uniqueString;        // unique notes for contact 1
+        String contactNotes2 = "New Notes 2" + uniqueString;        // unique notes for contact 2
+        String contactNotes3 = "New Notes 3" + uniqueString;        // unique notes for contact 3
+        String contactNotes4 = "New Notes 4" + uniqueString;        // unique notes for contact 4
 
-        String contactNotes1 = "New Notes 1" + n1;
-        String contactNotes2 = "New Notes 2" + n1;
-        String contactNotes3 = "New Notes 3" + n1;
+        contactManager.addNewContact(contactName, contactNotes1);   // add contact 1
+        contactManager.addNewContact(contactName, contactNotes2);   // add contact 2
+        contactManager.addNewContact(contactName, contactNotes3);   // add contact 3
+        contactManager.addNewContact("contains" + contactName + "contains", contactNotes4);     // add contact 4, contains
+                                                                                                // contact name
 
-        contactManager.addNewContact(contactName, contactNotes1);
-        contactManager.addNewContact(contactName, contactNotes2);
-        contactManager.addNewContact(contactName, contactNotes3);
-
-        String[] contactNotes = {contactNotes1, contactNotes2, contactNotes3};  // array of expected contact notes
+        String[] contactNotes = {contactNotes1, contactNotes2, contactNotes3, contactNotes4};  // array of expected contact notes
         Set<Contact> cs = contactManager.getContacts(contactName);  // get contacts by name
 
         int count = 0;
-        for (Contact c : cs) {              // for each contact
+        for (Contact c : cs) {                      // for each contact
             for (String s : contactNotes) {
-                if (c.getNotes().equals(s))        // check id corresponds to an expected id
+                if (c.getNotes().equals(s))         // check id corresponds to an expected id
                     count++;
             }
 
         }
 
-        assertTrue(count == 3); // count of contacts by name should be 3
+        assertTrue(count == 4); // count of contacts by name should be 4
 
     }
 
@@ -915,36 +882,36 @@ public class ContactManagerTest {
     }
 
     /**
-     * flush Tests
-     * Required tests:
-     *      - check data saved to file
+     * 26. <code>testFlush()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#flush() flush} method. Data should be written
+     *     to file and then retrieved.
+     * </p>
      */
-    @Ignore            // TESTED
-    public void testFlush() throws Exception {
+    @Ignore
+    public void testFlush() {
 
-        //String contactName = "Test Contact";
-        //String contactNotes = "Test Notes";
+        // add meeting to contact manager and get id
+        int meetingId = contactManager.addFutureMeeting(contacts, future);
 
-        int meetingId = contactManager.addFutureMeeting(contacts, future);  // add meeting to contact manager
-        //contactManager.addNewContact(contactName, contactNotes);            // add contact to contact manager
+        // add contact the contact manager and get id
+        String uniqueString = sdf.format(new Date()).toString();
+        int contactId = generateUniqueContactForMeetings(uniqueString);
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
+        // flush the data to file
+        contactManager.flush();
 
-        int contactId = generateUniqueContactForMeetings(n1);
+        // create new instance of contact manager with saved file
+        ContactManager newContactManager = new ContactManagerImpl();
 
-        contactManager.flush();     // save contents to file
+        // check meeting exists in new contact manager
+        assertTrue(newContactManager.getMeeting(meetingId) != null);
 
-        ContactManager newContactManager = new ContactManagerImpl();    // create new contact manager with saved file
-
-        assertTrue(newContactManager.getMeeting(meetingId) != null);    // check meeting exists in new contact manager
-
-        Set<Contact> cs = newContactManager.getContacts(contactId);   // get contacts by name
+        // check contact exists in new contact manager
+        Set<Contact> cs = newContactManager.getContacts(contactId);   // get contacts by id
         assertTrue(cs.size() == 1);     // check contact exists
 
     }
-
-
 
     /* I N T E R N A L   M E T H O D S */
 
@@ -1003,7 +970,7 @@ public class ContactManagerTest {
 
         for (int i = 1; i < meetings.size(); i++) {     // iterate through meeting list
             PastMeeting curMeeting = meetings.get(i);
-            if (curMeeting.getDate().after(prevMeeting.getDate())) {    // compare dates
+            if (curMeeting.getDate().compareTo(prevMeeting.getDate()) >= 0) {    // compare dates
                 // meetings in order
             } else {
                 before = false; // meetings not in order

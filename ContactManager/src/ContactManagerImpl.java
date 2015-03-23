@@ -17,9 +17,6 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.FutureTask;
-
-
 /**
  * Created by Basil on 07/03/2015.
  *
@@ -490,6 +487,8 @@ public class ContactManagerImpl implements ContactManager {
 
         }
 
+        sortPastMeetingList(ret);
+
         return ret;
 
     }
@@ -610,7 +609,7 @@ public class ContactManagerImpl implements ContactManager {
 
         for (Contact c : contacts) {
 
-            if (c.getName().equals(name))
+            if (c.getName().contains(name))
                 ret.add(c);
 
         }
@@ -783,6 +782,19 @@ public class ContactManagerImpl implements ContactManager {
 
 
     public void sortMeetingList(List<Meeting> toSort) {
+
+        Comparator<? super Meeting> comp = new Comparator<Meeting>() {
+            @Override
+            public int compare(Meeting o1, Meeting o2) {
+                return o1.getDate().compareTo(o2.getDate());
+            }
+        };
+
+        Collections.sort(toSort, (Comparator) comp);
+
+    }
+
+    public void sortPastMeetingList(List<PastMeeting> toSort) {
 
         Comparator<? super Meeting> comp = new Comparator<Meeting>() {
             @Override
