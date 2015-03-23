@@ -33,13 +33,22 @@ import java.util.*;
  * <li>7. <code>getMeeting()</code> main test: {@link #testGetMeeting() testGetMeeting main}</li>
  * <li>8. <code>getFutureMeetingList()</code> by contact test: {@link #testGetFutureMeetingListByContact() testGetFutureMeetingListByContact}</li>
  * <li>9. <code>getFutureMeetingList()</code> by contact <code>IllegalArgumentException</code> test: {@link #testGetFutureMeetingListByContactThrowsIllegalArgumentException() testGetFutureMeetingListByContact IllegalArgumentException}</li>
- * <li>11. <code>getPastMeetingList()</code> main test: {@link #testGetPastMeetingList() testGetPastMeetingList main}</li>
+ * <li>11. ***<code>getPastMeetingList()</code> main test: {@link #testGetPastMeetingList() testGetPastMeetingList main}</li>
  * <li>12. <code>getPastMeetingList() IllegalArgumentException</code> test: {@link #testGetPastMeetingListThrowsIllegalArgumentException() testGetPastMeetingList IllegalArgumentException}</li>
  * <li>13. <code>addNewPastMeeting()</code> main test: {@link #testAddNewPastMeeting() testAddNewPastMeeting main}</li>
  * <li>14. <code>addNewPastMeeting() IllegalArgumentException</code> test: {@link #testAddNewPastMeetingThrowsIllegalArgumentException() testAddNewPastMeeting IllegalArgumentException}</li>
  * <li>15. <code>addNewPastMeeting() NullPointerException</code> test: {@link #testAddNewPastMeetingThrowsNullPointerException() testAddNewPastMeeting NullPointerException}</li>
- *
- *
+ * <li>16. <code>addMeetingNotes()</code> main test: {@link #testAddMeetingNotes() testAddMeetingNotes main}</li>
+ * <li>17. <code>addMeetingNotes() IllegalArgumentException</code> test: {@link #testAddMeetingNotesThrowsIllegalArgumentException() testAddMeetingNotes IllegalArgumentException}</li>
+ * <li>18. <code>addMeetingNotes() NullPointerException</code> test: {@link #testAddMeetingNotesThrowsNullPointerException() testAddMeetingNotes NullPointerException}</li>
+ * <li>19. <code>addMeetingNotes() IllegalStateException</code> test: {@link #testAddMeetingNotesThrowsIllegalStateException() testAddMeetingNotes IllegalStateException}</li>
+ * <li>20. <code>addNewContact()</code> main test: {@link #testAddNewContact() testAddNewContact main}</li>
+ * <li>21. <code>addNewContact() NullPointerException</code> test: {@link #testAddNewContactThrowsNullPointerException() testAddNewContact NullPointerException}</li>
+ * <li>22. <code>getContacts()</code> by id test: {@link #testGetContactsById() testGetContacts by id}</li>
+ * <li>23. <code>getContacts()</code> by id <code>IllegalArgumentException</code> test: {@link #testGetContactsByIdThrowsIllegalArgumentException() testGetContacts by id IllegalArgumentException}</li>
+ * <li>24. </li>
+ * <li>25. <code>getContacts()</code> by name <code>NullPointerException</code> test: {@link #testGetContactsByNameThrowsNullPointerException() testGetContacts by name NullPointerException}</li>
+ * <li>26. </li>
  * </ul></p>
  *
  * @author Basil Mason
@@ -623,7 +632,7 @@ public class ContactManagerTest {
      * </p>
      */
     @Ignore
-    public void testAddNewPastMeetingThrowsIllegalArgumentException() throws Exception {
+    public void testAddNewPastMeetingThrowsIllegalArgumentException() {
 
         // create collection of contacts with contact unknown to contact manager
         Set<Contact> cs = new HashSet<Contact>();
@@ -645,7 +654,7 @@ public class ContactManagerTest {
      * </p>
      */
     @Ignore
-    public void testAddNewPastMeetingThrowsNullPointerException() throws Exception {
+    public void testAddNewPastMeetingThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);              // expect null pointer exception
         contactManager.addNewPastMeeting(null, past, "");       // due to null contacts
@@ -659,66 +668,70 @@ public class ContactManagerTest {
     }
 
     /**
-     * addMeetingNotes Tests
-     * Required tests:
-     *      - add new meeting notes to past meeting
-     *      - check for IllegalArgumentException if meeting does not exist
-     *      - check for IllegalStateException if meeting set in future
-     *      - check for NullPointerException if any notes are null
+     * 16. <code>testAddMeetingNotes()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#addMeetingNotes addMeetingNotes} method and its
+     *     main functionality. This method should add meeting notes to a past meeting.
+     * </p>
      */
-    @Ignore           // TESTED -- retest
-    public void testAddMeetingNotes() throws Exception {
+    @Ignore
+    public void testAddMeetingNotes() {
 
-        PastMeeting pm;
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
-        String pastMeetingNotes = "blah blah" + n1;  // meeting notes to check
+        PastMeeting pm;                                                 // past meeting to be found
+        int pastMeetingId;                                              // id of past meeting to be found
+        String pastMeetingNotes = sdf.format(new Date()).toString();    // meeting notes to check
 
         // method 1, setup future meeting and wait until it is a past meeting
-        // then add notes by id
+        // then search by id
+        // this is necessary to confirm that future meetings convert to past meetings correctly
+        pastMeetingId = setupPastMeeting(contacts);                     // setup meeting in past using internal method
+        pm = contactManager.getPastMeeting(pastMeetingId);              // get past meeting by id
+        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);   // add notes
+        pm = contactManager.getPastMeeting(pm.getId());                 // re-get pm by ID because addMeetingNotes creates
+                                                                        // new instance of PastMeeting, since there is no
+                                                                        // method for adding notes without creating a meeting.
 
-        int c = generateUniqueContactForMeetings("blah blah" + n1);
+        // check unique notes on meeting confirms meeting notes added to past meeting
+        assertTrue(pm.getNotes().equals(pastMeetingNotes));
 
-        Set<Contact> cs = contactManager.getContacts(c);
+        // method 2, setup a new past meeting directly
+        // checking that notes can be added to meetings that have been converted to past meetings
+        int c1 = generateUniqueContactForMeetings(pastMeetingNotes);        // call internal method to generate unique contact
+        Contact c = (Contact) contactManager.getContacts(c1).toArray()[0];  // find unique contact, one expected
 
-        int pastMeetingId = setupPastMeeting(cs);                         // setup future-turned-past meeting
-        pm = contactManager.getPastMeeting(pastMeetingId);                      // get past meeting by id
-        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);           // add notes
+        // create contact collection with unique contact to create meeting with
+        Set<Contact> cs = new HashSet<Contact>();
+        cs.add(c);  // add unique contact
 
-        List<PastMeeting> pms = contactManager.getPastMeetingList((Contact) contactManager.getContacts(c).toArray()[0]);
+        // create new past meeting directly with blank notes
+        contactManager.addNewPastMeeting(cs, past, "");
 
-        for (PastMeeting m : pms) {
+        // get list of past meetings based on unique contact
+        List<PastMeeting> pms = contactManager.getPastMeetingList(c);
 
-            assertTrue(pastMeetingNotes.equals(m.getNotes()));                     // test meeting notes match
-        }
+        // one meeting expected in list with unique contact, set as past meeting
+        pm = contactManager.getPastMeeting(pms.get(0).getId());
 
-        // method 2, setup new past meeting directly, with unique contact to search by
+        // add meeting notes to now past meeting and re-get
+        contactManager.addMeetingNotes(pm.getId(), pastMeetingNotes);
+        pm = contactManager.getPastMeeting(pm.getId());
 
-        String n2 = sdf.format(new Date()).toString();
-        int c2 = generateUniqueContactForMeetings(n1);
-        Contact contact2 = (Contact) contactManager.getContacts(c2).toArray()[0];
-
-        Set<Contact> cs2 = new HashSet<Contact>();
-        cs2.add(contact2);
-
-        contactManager.addNewPastMeeting(cs2, past, n2);
-
-        List<PastMeeting> pms2 = contactManager.getPastMeetingList(contact2);
-
-        for (PastMeeting m : pms2) {
-
-            String notes = m.getNotes();
-
-            assertTrue(n2.equals(notes));
-
-        }
+        // check unique notes on meeting confirms meeting notes added to past meeting
+        assertTrue(pm.getNotes().equals(pastMeetingNotes));
 
     }
 
-    @Ignore             // TESTED -- retest
+    /**
+     * 17. <code>testAddMeetingNotes() IllegalArgumentException</code> test
+     * <p>
+     *     This test attempts to add some notes to a meeting that does not exist. An IllegalArgumentException
+     *     should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
-        int meetingId = 12345678;       // meeting id does not exist
+        int meetingId = 12345678;                           // meeting id does not exist
         String notes = "blah blah.";
 
         thrown.expect(IllegalArgumentException.class);      // expect illegal argument exception
@@ -726,56 +739,78 @@ public class ContactManagerTest {
 
     }
 
-    
-
-    @Ignore             // TESTED
+    /**
+     * 18. <code>testAddMeetingNotes() NullPointerException</code> test
+     * <p>
+     *     This test attempts to add <code>null</code> notes to a past meeting. A NullPointerException
+     *     should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testAddMeetingNotesThrowsNullPointerException() {
 
-        //contacts.add(finder);                                                   // add finder contact to contacts for meeting
-        //contactManager.addNewPastMeeting(contacts, past, "");                   // add new past meeting directly
-        //PastMeeting pm = contactManager.getPastMeetingList(finder).get(0);      // return the past meeting based on finder contact
+        int pmid = setupPastMeeting(contacts);          // setup past meeting
 
-        int pmid = setupPastMeeting(contacts);
-
-        thrown.expect(NullPointerException.class);          // expect null point exception
-        contactManager.addMeetingNotes(pmid, null);   // when notes are null
+        thrown.expect(NullPointerException.class);      // expect null point exception
+        contactManager.addMeetingNotes(pmid, null);     // when notes are null
 
     }
 
     /**
-     * addNewContact Tests
-     * Required tests:
-     *      - add new contact and check name and notes
-     *      - check for NullPointerException if any input is null
+     * 19. <code>testAddMeetingNotes() IllegalStateException</code> test
+     * <p>
+     *     This test attempts to add some notes to a future meeting. An IllegalStateException
+     *     should be thrown.
+     * </p>
      */
-    @Ignore           // TESTED -- retest
-    public void testAddNewContact() throws Exception {
+    @Ignore
+    public void testAddMeetingNotesThrowsIllegalStateException() {
 
-        //String newContactName = "Mr New Contact";                           // setup new contact
-        //String newContactNotes = "Mr New Contact's notes";
-        //contactManager.addNewContact(newContactName, newContactNotes);      // add new contact
+        // add meeting in future
+        int meetingId = contactManager.addFutureMeeting(contacts, future);
+        String notes = "blah blah.";
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
+        thrown.expect(IllegalStateException.class);         // expect illegal state exception
+        contactManager.addMeetingNotes(meetingId, notes);   // due to meeting in future
 
-        int contactId = generateUniqueContactForMeetings(n1);
+    }
 
-        // retrieve all contacts based on name
-        Set<Contact> cs = contactManager.getContacts(contactId);
+    /**
+     * 20. <code>testAddNewContact()</code> main test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#addNewContact addNewContact} method and its
+     *     main functionality. This method should add a new meeting to the contact manager.
+     * </p>
+     */
+    @Ignore
+    public void testAddNewContact() {
 
-        int count = 0;
+        String uniqueNotes = sdf.format(new Date()).toString();         // unique string
+        String contactName = "New Contact";                             // contact name
+        contactManager.addNewContact(contactName, uniqueNotes);         // add contact with unique notes to be identified by
 
-        // for each contact, check notes.
+        // find all contacts with new contact name
+        Set<Contact> cs = contactManager.getContacts(contactName);
+
+        int count = 0;      // counter
+        // loop through collection of contacts and locate contact based on unique notes string
         for (Contact c : cs) {
-            if (c.getNotes().equals(n1))   // if notes equal new contact notes, increment count
-                count++;
+            if (c.getNotes().equals(uniqueNotes))     // check contact has the unique notes
+                count++;                // get the id of the contact that has the unique notes
         }
 
         assertTrue(count == 1);     // expect 1 contact with new contact notes
 
     }
 
-    @Ignore           // TESTED
+    /**
+     * 21. <code>testAddNewContact() NullPointerException</code> test
+     * <p>
+     *     This test attempts to add a contact with a <code>null</code> argument. A NullPointerException
+     *     should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testAddNewContactThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);          // expect null pointer exception
@@ -787,39 +822,51 @@ public class ContactManagerTest {
     }
 
     /**
-     * getContacts Tests
-     * Required tests:
-     *      - get contacts by name
-     *      - get contacts by ids
-     *      - check for IllegalArgumentException if id does not exist
-     *      - check for NullPointerException if name is null
+     * 22. <code>testGetContacts()</code> by id test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#getContacts(int...) getContacts(int)} by id method
+     *     and its main functionality. This method should retrieve one or many contacts from the contact manager based on id.
+     * </p>
      */
-    @Ignore           // TESTED
-    public void testGetContactsById() throws Exception {
+    @Ignore
+    public void testGetContactsById() {
 
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-        String n1 = sdf.format(new Date()).toString();
-        int contact1 = generateUniqueContactForMeetings(n1);
-        String n2 = sdf.format(new Date()).toString();
-        int contact2 = generateUniqueContactForMeetings(n2);
+        String uniqueString1 = "1 : " + sdf.format(new Date()).toString();
+        int contact1 = generateUniqueContactForMeetings(uniqueString1);
+        String uniqueString2 = "2 : " + sdf.format(new Date()).toString();
+        int contact2 = generateUniqueContactForMeetings(uniqueString1);
 
         Set<Contact> cs = contactManager.getContacts(contact1, contact2);       // get two known contacts by id
         for (Contact c : cs) {
-            assertTrue(c.getNotes().equals(n1) || c.getNotes().equals(n2));   // check id returns name that exists
+            assertTrue(c.getNotes().equals(uniqueString1) || c.getNotes().equals(uniqueString2));   // check id returns name that exists
         }
 
     }
 
-    @Ignore             // TESTED
-    public void testGetContactsByIdThrowsIllegalArgumentException() throws Exception {
+    /**
+     * 23. <code>testGetContacts() IllegalArgumentException</code> test
+     * <p>
+     *     This test attempts to get a contact that does not exist. An IllegalArgumentException
+     *     should be thrown.
+     * </p>
+     */
+    @Ignore
+    public void testGetContactsByIdThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);  // expect illegal argument exception
         contactManager.getContacts(12345678);           // if id does not exist
 
-
     }
 
-    @Ignore           // TESTED
+    /**
+     * 24. <code>testGetContactsByName()</code> by name test
+     * <p>
+     *     This method tests the contact manager's {@link ContactManager#getContacts(String) getContacts(String)} by name method
+     *     and its main functionality. This method should retrieve a collection of contacts based on name. It should
+     *     contain all contacts who's names contain the given string, or be empty otherwise.
+     * </p>
+     */
+    @Ignore
     public void testGetContactsByName() throws Exception {
 
         String contactName = "New Contact";
@@ -851,7 +898,14 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore             // TESTED
+    /**
+     * 25. <code>testGetContacts() NullPointerException</code> test
+     * <p>
+     *     This test attempts to find a contact with a null string. A NullPointerException
+     *     should be thrown.
+     * </p>
+     */
+    @Ignore
     public void testGetContactsByNameThrowsNullPointerException() throws Exception {
 
         String sNull = null;                        // setup null string
@@ -890,17 +944,7 @@ public class ContactManagerTest {
 
     }
 
-    @Ignore           // TESTED
-    public void testAddMeetingNotesThrowsIllegalStateException() {
 
-        // add meeting in future
-        int meetingId = contactManager.addFutureMeeting(contacts, future);
-        String notes = "blah blah.";
-
-        thrown.expect(IllegalStateException.class);         // expect illegal state exception
-        contactManager.addMeetingNotes(meetingId, notes);   // due to meeting in future
-
-    }
 
     /* I N T E R N A L   M E T H O D S */
 
@@ -931,7 +975,7 @@ public class ContactManagerTest {
 
         // create meeting 10 seconds in future and get ID
         Calendar soon = Calendar.getInstance();
-        soon.add(Calendar.SECOND, +10);   // increase 10 seconds
+        soon.add(Calendar.SECOND, +2);   // increase 10 seconds
         int pastMeetingId = contactManager.addFutureMeeting(withContacts, soon);
 
         while(wait) {   // wait until meeting is in the past

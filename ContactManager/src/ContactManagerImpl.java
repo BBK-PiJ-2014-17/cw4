@@ -830,33 +830,35 @@ public class ContactManagerImpl implements ContactManager {
 
     private synchronized void updateMeetingTypes() {
 
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        List<Meeting> updatedMeetings = new ArrayList<Meeting>();
 
-        synchronized (obj) {
+        for (Object m : meetings) {
 
-            for (Object m : meetings) {
+            if (m instanceof FutureMeeting) {
 
-                if (m instanceof FutureMeeting) {
+                FutureMeeting fm = (FutureMeeting) m;
 
-                    FutureMeeting fm = (FutureMeeting) m;
+                Calendar now = Calendar.getInstance();
+                if (now.compareTo(fm.getDate()) > 0) {
 
-                    Calendar now = Calendar.getInstance();
-                    if (now.compareTo(fm.getDate()) > 0) {
+                    PastMeeting pm = new PastMeetingImpl(fm, "");
+                    updatedMeetings.add(pm);
 
-                        meetings.add(new PastMeetingImpl(fm, ""));
-                        meetings.remove(fm);
+                } else {
 
-                    }
+                    updatedMeetings.add((Meeting) m);
 
                 }
+
+            } else {
+
+                updatedMeetings.add((Meeting) m);
 
             }
 
         }
+
+        meetings = updatedMeetings;
 
     }
 }
