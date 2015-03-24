@@ -1,9 +1,9 @@
+// file read, xml and java utility libraries and methods
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
-
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -21,13 +21,57 @@ import java.util.*;
  * Created by Basil on 07/03/2015.
  *
  * Implementation of ContactManager interface
+ *
+ * A contact manager object for maintaining meetings and contacts. The meetings and contacts are stored internally in
+ * a List and Set, respectively. All meetings, Past and Future are stored as Meetings only and cast when required.
+ *
+ * IDs are unique for all contacts and meetings. The ID generation is centralised within the contact manager and the
+ * contact and meeting classes are considered dependent on the contact manager, not separate entities. See internal
+ * method {@link #uniqueId() uniqueId()}.
+ *
+ * All data is stored offline in an xml file, contacts.txt. If a file is not present at initialisation, one is created.
+ * Otherwise, the existing file is read and used to populate the internal data structures. The file is written to by
+ * a call to the {@link #flush() flush} method.
+ *
+ * The xml format has three sections: manager, contacts and, meetings.
+ *
+ *      manager:    stores to current unique ID
+ *      contacts:   stores details of the contacts
+ *      meetings:   stores details of the meetings. Each meeting also has a list of contacts. Within each meeting,
+ *                  only a reference to the contact is made by id.
+ *
+ * *** Example XML ***
+ *
+ * <contactmanager>
+ *      <manager>
+ *          <CM_ID>103</CM_ID>
+ *      </manager>
+ *      <contacts>
+ *          <contact id="34">
+ *              <name>New Contact</name>
+ *              <notes>Met 2015-03-23</notes>
+ *          </contact>
+ *      </contacts>
+ *      <meetings>
+ *          <meeting id="96" type="past">
+ *              <date>22-03-2015</date>
+ *              <meetingContacts>
+ *                  <meetingContact id="95"/>
+ *                  <meetingContact id="43"/>
+ *              </meetingContacts>
+ *              <notes>Agenda</notes>
+ *          </meeting>
+ *      </meetings>
+ * </contactmanager>
+ *
  */
 public class ContactManagerImpl implements ContactManager {
 
-    private final String filePath = "contacts.xml"; // contact manager output file
+    //
+    private final String filePath = "contacts.txt"; // contact manager output file
     private Set<Contact> contacts;                  // collection of contacts
     private List<? super Meeting> meetings;         // list of meetings (Past or Future)
-    private static int CM_ID = 0;                              // unique ID for meeting and contact creation
+    private static int CM_ID = 0;                   // unique ID for meeting and contact creation
     SimpleDateFormat format;                        // format for dates in file
 
     private Object obj = new Object();

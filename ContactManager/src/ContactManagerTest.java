@@ -49,6 +49,8 @@ import java.util.*;
  * <li>26. <code>flush()</code> main test: {@link #testFlush() testFlush main}</li>
  * </ul></p>
  *
+ * All tests passed in single run.
+ *
  * @author Basil Mason
  * @version 1.0.1
  * @since 07/02/2015
@@ -56,12 +58,11 @@ import java.util.*;
 public class ContactManagerTest {
 
     // set general variables for use in any test
-    private ContactManager contactManager, contactManagerWithFile, contactManagerWithoutFile;              // the contact manager object to test
-    private Contact basil, rebecca, unknown, finder;    // individual contacts to test
-    private String basilString, rebeccaString, unknownString, finderString;                        // search string to find past meetings by contact
+    private ContactManager contactManager;              // the contact manager object to test
+    private String basilString, rebeccaString;          // search string to find past meetings by contact
     private Set<Contact> contacts;                      // a collection of contacts for meetings
     private Calendar past, future;                      // dates for past and future meetings
-    SimpleDateFormat sdf;
+    SimpleDateFormat sdf;                               // date format for creation of unique strings in tests
 
     /**
      * <code>setUp()</code>
@@ -134,7 +135,7 @@ public class ContactManagerTest {
      *     list of meetings. This meeting should also receive a unique id.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddFutureMeeting() {
 
         // two future meetings are added and their IDs stored
@@ -161,7 +162,7 @@ public class ContactManagerTest {
      *     be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddFutureMeetingThrowsIllegalArgumentException() {
 
         // check future meeting create with past date
@@ -188,7 +189,7 @@ public class ContactManagerTest {
      *     not exist.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetPastMeeting() {
 
         PastMeeting pm;     // past meeting to be found
@@ -236,7 +237,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetPastMeetingThrowsIllegalArgumentException() {
 
         // create future meeting and get id
@@ -255,7 +256,7 @@ public class ContactManagerTest {
      *     main functionality. The method should get a future meeting, given an id or null id no such meeting exists.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetFutureMeeting() {
 
         // add future meeting and get ID
@@ -276,7 +277,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetFutureMeetingThrowsIllegalArgumentException() {
 
         // id of future meeting to be created
@@ -299,7 +300,7 @@ public class ContactManagerTest {
      *     should work for returning both past and future meetings
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetMeeting() {
 
         int meetingId;  // meeting id to be found
@@ -354,7 +355,7 @@ public class ContactManagerTest {
      *     Check no past meetings are returned, or meetings without the specified contact.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetFutureMeetingListByContact() {
 
         // create a unique contact with no meetings
@@ -424,7 +425,7 @@ public class ContactManagerTest {
      *     manager. An IllegalArgumentException should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetFutureMeetingListByContactThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);                          // expect invalid argument exception
@@ -443,7 +444,7 @@ public class ContactManagerTest {
      *     Check no past meetings are returned, or meetings on different dates.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetFutureMeetingListByDate() {
 
         // pick random date in the future
@@ -504,7 +505,7 @@ public class ContactManagerTest {
      *     Check no future meetings are returned, or meetings on without the given contact.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetPastMeetingList() throws Exception {
 
         // setup unique contact
@@ -551,7 +552,7 @@ public class ContactManagerTest {
      *     An IllegalArgumentException should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetPastMeetingListThrowsIllegalArgumentException() throws Exception {
 
         thrown.expect(IllegalArgumentException.class);                      // expect invalid argument exception
@@ -567,7 +568,7 @@ public class ContactManagerTest {
      *     list of meetings.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddNewPastMeeting() {
 
         // setup unique contact to search by
@@ -597,7 +598,7 @@ public class ContactManagerTest {
      *     empty, or containing contacts unknown to the contact manager. An IllegalArgumentException should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddNewPastMeetingThrowsIllegalArgumentException() {
 
         // create collection of contacts with contact unknown to contact manager
@@ -619,7 +620,7 @@ public class ContactManagerTest {
      *     NullPointerException should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddNewPastMeetingThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);              // expect null pointer exception
@@ -640,7 +641,7 @@ public class ContactManagerTest {
      *     main functionality. This method should add meeting notes to a past meeting.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddMeetingNotes() {
 
         PastMeeting pm;                                                 // past meeting to be found
@@ -694,7 +695,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddMeetingNotesThrowsIllegalArgumentException() {
 
         int meetingId = 12345678;                           // meeting id does not exist
@@ -712,7 +713,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddMeetingNotesThrowsNullPointerException() {
 
         int pmid = setupPastMeeting(contacts);          // setup past meeting
@@ -729,7 +730,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddMeetingNotesThrowsIllegalStateException() {
 
         // add meeting in future
@@ -748,7 +749,7 @@ public class ContactManagerTest {
      *     main functionality. This method should add a new meeting to the contact manager.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddNewContact() {
 
         String uniqueNotes = sdf.format(new Date()).toString();         // unique string
@@ -776,7 +777,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testAddNewContactThrowsNullPointerException() {
 
         thrown.expect(NullPointerException.class);          // expect null pointer exception
@@ -794,7 +795,7 @@ public class ContactManagerTest {
      *     and its main functionality. This method should retrieve one or many contacts from the contact manager based on id.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetContactsById() {
 
         String uniqueString1 = "1 : " + sdf.format(new Date()).toString();
@@ -816,7 +817,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetContactsByIdThrowsIllegalArgumentException() {
 
         thrown.expect(IllegalArgumentException.class);  // expect illegal argument exception
@@ -832,7 +833,7 @@ public class ContactManagerTest {
      *     contain all contacts who's names contain the given string, or be empty otherwise.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetContactsByName() {
 
         String contactName = "New Contact";                         // new contact name
@@ -872,7 +873,7 @@ public class ContactManagerTest {
      *     should be thrown.
      * </p>
      */
-    @Ignore
+    @Test
     public void testGetContactsByNameThrowsNullPointerException() throws Exception {
 
         String sNull = null;                        // setup null string
@@ -888,7 +889,7 @@ public class ContactManagerTest {
      *     to file and then retrieved.
      * </p>
      */
-    @Ignore
+    @Test
     public void testFlush() {
 
         // add meeting to contact manager and get id
@@ -915,32 +916,19 @@ public class ContactManagerTest {
 
     /* I N T E R N A L   M E T H O D S */
 
-    @Ignore
-    public void testGetFutureMeetingListChronology() throws Exception {
-
-        Calendar date1 = Calendar.getInstance();
-        date1.add(Calendar.DAY_OF_MONTH, +100);
-
-        Calendar date2 = Calendar.getInstance();
-        date2.add(Calendar.DAY_OF_MONTH, +50);
-
-        contactManager.addFutureMeeting(contacts, date1);
-        contactManager.addFutureMeeting(contacts, date2);
-
-        assertTrue(checkChronologyOfList(contactManager.getFutureMeetingList((Contact) contacts.toArray()[0])));
-
-    }
-
     /**
-     * internal test method to setup meeting that starts in future but turns into past meeting
-     * @param withContacts contacts for meeting
-     * @return id of meeting
+     * <code>setupPastMeeting</code> internal method
+     * <p>
+     *     internal test method to setup meeting that starts in future but turns into past meeting
+     *     @param withContacts contacts for meeting
+     *     @return id of meeting
+     * </p>
      */
     private int setupPastMeeting(Set<Contact> withContacts) {
 
         boolean wait = true;
 
-        // create meeting 10 seconds in future and get ID
+        // create meeting 2 seconds in future and get ID
         Calendar soon = Calendar.getInstance();
         soon.add(Calendar.SECOND, +2);   // increase 10 seconds
         int pastMeetingId = contactManager.addFutureMeeting(withContacts, soon);
@@ -958,9 +946,12 @@ public class ContactManagerTest {
     }
 
     /**
-     * internal test method to check chronology of collection of PastMeetings
-     * @param meetings List of meetings to check order on
-     * @return true if list chronologically ordered
+     * <code>checkChronologyOfListPast</code> internal method
+     * <p>
+     *     internal test method to check chronology of collection of PastMeetings
+     *     @param meetings List of meetings to check order on
+     *     @return true if list chronologically ordered
+     * </p>
      */
     private boolean checkChronologyOfListPast(List<PastMeeting> meetings) {
 
@@ -983,9 +974,12 @@ public class ContactManagerTest {
     }
 
     /**
-     * internal test method to check chronology of collection of Meetings
-     * @param meetings List of meetings to check order on
-     * @return true if list chronologically ordered
+     * <code>checkChronologyOfList</code> internal method
+     * <p>
+     *      internal test method to check chronology of collection of Meetings
+     *      @param meetings List of meetings to check order on
+     *      @return true if list chronologically ordered
+     * </p>
      */
     private boolean checkChronologyOfList(List<Meeting> meetings) {
 
@@ -1043,22 +1037,6 @@ public class ContactManagerTest {
 
         // return the contact id
         return ret;
-    }
-
-    private Set<Contact> generateContactSetForMeeting() {
-
-        Set<Contact> ret = new HashSet<Contact>();
-
-        //ret.add(contactManager.getContacts(generateUniqueContactForMeetings()))
-
-        return ret;
-
-    }
-
-    private void setupPastMeetingDirectly() {
-
-
-
     }
 
 }
