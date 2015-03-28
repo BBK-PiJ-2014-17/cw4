@@ -35,7 +35,7 @@ import java.util.*;
  *
  * The xml format has three sections: manager, contacts and, meetings.
  *
- *      manager:    stores to current unique ID
+ *      manager:    stores to current unique ID seed
  *      contacts:   stores details of the contacts
  *      meetings:   stores details of the meetings. Each meeting also has a list of contacts. Within each meeting,
  *                  only a reference to the contact is made by id.
@@ -67,17 +67,17 @@ import java.util.*;
  */
 public class ContactManagerImpl implements ContactManager {
 
-    //
+    /* V A R I A B L E S */
+
     private final String filePath = "contacts.txt"; // contact manager output file
     private Set<Contact> contacts;                  // collection of contacts
     private List<? super Meeting> meetings;         // list of meetings (Past or Future)
     private static int CM_ID = 0;                   // unique ID for meeting and contact creation
     SimpleDateFormat format;                        // format for dates in file
 
-    private Object obj = new Object();
+    /* E N U M S */
 
-    // meeting type enum
-
+    // an internal string enum for meeting type checking
     private enum MeetingType {
         PAST ("past"),
         FUTURE ("future");
@@ -91,52 +91,62 @@ public class ContactManagerImpl implements ContactManager {
         }
     }
 
+    /* P U B L I C   S T A T I C */
+
+    // a static method to generate unique IDs
+    // called externally by meetings and contacts upon creation
     public static int uniqueId() {
         CM_ID++;
         return CM_ID;
     }
 
-    /* C O N S T R U C T O R */
+    /* C O N S T R U C T O R S */
 
+    /**
+     * <code>ContactManagerImpl()</code> constructor
+     * <p>
+     *     The default constructor prepares the internal collections of meetings and contacts. If a contacts.txt file
+     *     is present, the data is read in. Otherwise, the internal collections are initialised as empty.
+     * </p>
+     */
     public ContactManagerImpl() {
 
+        // xml file read setup
         File contactsXml = new File(filePath);                      // set xml file path
-        NodeList root, managerNodes, contactNodes, meetingNodes, meetingContactNodes;   // node lists for xml read
+        NodeList managerNodes, contactNodes,
+                    meetingNodes, meetingContactNodes;              // node lists for xml read
         DocumentBuilderFactory dbFactory;                           // for xml output
         DocumentBuilder dBuilder;                                   // for xml output
         Document doc;                                               // for xml output
 
+        // variable initialisation
         contacts = new HashSet<Contact>();                          // initialise contacts set
         meetings = new ArrayList<Meeting>();                        // initialise meetings list
         format = new SimpleDateFormat("dd-MM-yyyy");                // initialise date format
 
-        // setup file read
-
+        // file read
         try {
 
-            if(!contactsXml.exists()) {             // if file doesn't already exist
+            // if file doesn't already exist
+            if(!contactsXml.exists()) {
                 contactsXml.createNewFile();        // create the file
-            } else {                                // else read file into values
+            } else {                                // else read file
 
+                // xml DOM builder
                 dbFactory = DocumentBuilderFactory.newInstance();   // setup xml read
                 dBuilder = dbFactory.newDocumentBuilder();          // setup xml read
                 doc = dBuilder.parse(contactsXml);                  // read in file
                 doc.getDocumentElement().normalize();               // normalise xml
 
-                // start at root
-
-                //root = doc.getElementsByTagName("contactManager");
-
+                // 1. Manager section - contains unique ID
                 // read in current unique ID
-
-                managerNodes = doc.getElementsByTagName("manager");     // get manager node
-                CM_ID = Integer.parseInt(managerNodes.item(0).getTextContent());
-
+                managerNodes = doc.getElementsByTagName("manager");                 // get manager section
+                CM_ID = Integer.parseInt(managerNodes.item(0).getTextContent());    // only one node expected
+                                                                                    // containing unique ID seed
+                // 2. Contacts section - contains all known contacts
                 // read in contacts
-
                 contactNodes = doc.getElementsByTagName("contact");     // get list of contact nodes
-
-                for (int i = 0; i < contactNodes.getLength(); i++) {    // read each node into contacts set
+                for (int i = 0; i < contactNodes.getLength(); i++) {
 
                     Node nNode = contactNodes.item(i);      // current node
 
@@ -154,8 +164,8 @@ public class ContactManagerImpl implements ContactManager {
                     }
                 }
 
+                // 3. Meetings section - contacts all scheduled meetings, past and future
                 // read in meetings
-
                 meetingNodes = doc.getElementsByTagName("meeting");     // get list of meeting nodes
 
                 for (int i = 0; i < meetingNodes.getLength(); i++) {    // read each node into meeting list
@@ -166,17 +176,15 @@ public class ContactManagerImpl implements ContactManager {
 
                         Element eElement = (Element) nMeeting; // current element node
 
-                        // meeting date from file as calendar object
-
+                        // 3.1 meeting date from file as calendar object
                         Date xmlDate = format.parse(eElement.getElementsByTagName("date").item(0).getTextContent());    // read date from string
                         Calendar meetingDate = Calendar.getInstance();  // create calendar object
                         meetingDate.setTime(xmlDate);                   // initialise calendar object with date from file
 
-                        // meeting notes
-
+                        // 3.2 meeting notes
                         String meetingNotes = eElement.getElementsByTagName("notes").item(0).getTextContent();
 
-                        // meeting contacts collection from file
+                        // 3.3 meeting contacts collection from file
                         Set<Contact> meetingContacts = new HashSet<Contact>();  // set for current meeting
 
                         Element mcs = (Element) eElement.getElementsByTagName("meetingContacts").item(0);
@@ -200,7 +208,6 @@ public class ContactManagerImpl implements ContactManager {
                         }
 
                         // determine meeting type and add meeting to meeting list
-
                         if (eElement.getAttribute("type").equals(MeetingType.PAST.toString())) {
 
                             PastMeeting m = new PastMeetingImpl(Integer.parseInt(eElement.getAttribute("id")),
@@ -222,6 +229,8 @@ public class ContactManagerImpl implements ContactManager {
                     }
                 }
             }
+
+        // exception handling
         } catch (IOException e) {
             e.printStackTrace();
         } catch (ParserConfigurationException e) {
@@ -403,7 +412,7 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     * <code>getFutureMeetingList(Contact)</code>
+     * <code>getFutureMeetingList(Contact)</code> by contact
      * {@inheritDoc}
      * <p>
      *     This method returns a list of future meetings given a contact. If no meetings exists, an empty list is
@@ -461,7 +470,7 @@ public class ContactManagerImpl implements ContactManager {
     }
 
     /**
-     * <code>getFutureMeetingList(Calendar)</code>
+     * <code>getFutureMeetingList(Calendar)</code> by date
      * {@inheritDoc}
      * <p>
      *     This method returns a list of future meetings given a date. If no meetings exists, an empty list is
@@ -503,36 +512,59 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    /**
+     * <code>getPastMeetingList(Contact)</code> by contact
+     * {@inheritDoc}
+     * <p>
+     *     This method returns a list of past meetings given a contact. If no meetings exists, an empty list is
+     *     returned.
+     *
+     *     A check is made for all future meetings that have become past meetings since the last update to the internal
+     *     list of meetings. Any future meetings whose dates is now in the past are updated accordingly. See internal
+     *     method {@link #updateMeetingTypes() updateMeetingTypes}.
+     *
+     *     Furthermore, the list of meetings to be returned is sorted into chronological order. See method
+     *     {@link #sortMeetingList(List) sortMeetingList}.
+     * </p>
+     *
+     * @return list of past meetings based on contact, or an empty list.
+     */
     @Override
     public List<PastMeeting> getPastMeetingList(Contact contact) {
 
+        // if the contact is unknown to the contact manager, throw an exception
         if (!checkContactExists(contact))
             throw new IllegalArgumentException();
 
-        updateMeetingTypes();   // update any future meetings
+        // update any future meetings
+        updateMeetingTypes();
 
+        // return list of meetings
         List<PastMeeting> ret = new ArrayList<PastMeeting>();
 
+        // scan internal list of meetings
         for (Object o : meetings) {
 
+            // if the meeting is a past meeting
             if (o instanceof PastMeeting) {
 
-                PastMeeting m = (PastMeeting) o;
-                Set<Contact> cs = m.getContacts();
+                PastMeeting m = (PastMeeting) o;        // cast to meeting to access contacts
+                Set<Contact> cs = m.getContacts();      // get contacts
 
+                // scan meeting contacts for given contact id
                 for (Contact c : cs) {
-
-                    if (contact.getId() == c.getId())
-                        ret.add(m);
-
+                    if (contact.getId() == c.getId())   // if the contact is present in this meeting
+                        ret.add(m);                     // add the meeting to the return list
                 }
 
             }
 
         }
 
+        // sort the return list in chronological order
         sortPastMeetingList(ret);
 
+        // return list of meetings, or an empty list
         return ret;
 
     }
@@ -544,7 +576,6 @@ public class ContactManagerImpl implements ContactManager {
      *     After checking that none of the arguments are null, the contacts are known
      *     to the contact manager, and that the contact collection is not empty,
      *     this method adds a new past meeting to the internal list of meetings.
-     *
      * </p>
      */
     @Override
@@ -567,150 +598,194 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    /**
+     * <code>addMeetingNotes()</code>
+     * {@inheritDoc}
+     * <p>
+     *     After checking that the notes passed are not null and that the meeting
+     *     exists and was in the past, this methods adds notes to a past meeting.
+     *
+     *     Since there is no API on the meeting class to add notes directly, a
+     *     copy constructor is used, creating a new meeting with the details of the
+     *     given meeting, but with the notes added.
+     * </p>
+     */
     @Override
     public void addMeetingNotes(int id, String text) {
 
+        // check that the notes are not null
         if (text == null)
             throw new NullPointerException();
 
+        // check that the meeting exists
         Meeting m = getMeeting(id);
-
         if (m == null)
             throw new IllegalArgumentException();
 
+        // check that the meeting was in the past
         Calendar now = Calendar.getInstance();
         if (now.compareTo(m.getDate()) < 0)
             throw new IllegalStateException();
 
+        // create a new meeting using the copy constructor
         PastMeeting pm = new PastMeetingImpl(m, text);
 
-        // add all meeting updates into synchronised method
-
+        // update the internal list of meetings
         meetings.remove(m);     // remove existing meeting
         meetings.add(pm);       // add new past meeting with notes
 
     }
 
+    /**
+     * <code>addNewContact()</code>
+     * {@inheritDoc}
+     * <p>
+     *     After checking that none of the arguments are null, this method creates
+     *     a new contact and adds it to the internal collection of contacts.
+     * </p>
+     */
     @Override
     public void addNewContact(String name, String notes) {
 
+        // check that the arguments are of null
         if (name == null || notes == null)
             throw new NullPointerException();
 
+        // create a new contact and add them to the collection of contacts
         contacts.add(new ContactImpl(uniqueId(), name, notes));
 
     }
 
+    /**
+     * <code>getContacts()</code> by id(s)
+     * {@inheritDoc}
+     * <p>
+     *     After checking that the requested contacts exists, this method compiles
+     *     and returns a set of contacts based on the ids supplied.
+     * </p>
+     */
     @Override
     public Set<Contact> getContacts(int... ids) {
 
+        // check that each of the given ids exists
         for (int i : ids) {
 
-            boolean exists = false;
-
+            // iterate through set of contacts to check for id
+            boolean exists = false;         // existence flag
             for (Contact c : contacts) {
-
-                if (i == c.getId()) {
-
-                    exists = true;
-
-                }
-
+                if (i == c.getId())         // if the contact exists
+                    exists = true;          // set the flag to true
             }
 
+            // if the contact id was not found in the set of contacts
             if (!exists)
-                throw new IllegalArgumentException();
+                throw new IllegalArgumentException();   // throw exception
 
         }
 
+        // return collection
         Set<Contact> ret = new HashSet<Contact>();
 
+        // go through internal set of contacts
         for (Contact c : contacts) {
 
+            // for each id passed to the method
             for (int i : ids) {
-
-                if (i == c.getId()) {
-                    ret.add(c);
-                }
-
+                if (i == c.getId())
+                    ret.add(c);         // add the contact to the return set
             }
-
-            //if (Arrays.asList(ids).contains(c.getId()))
-            //    ret.add(c);
 
         }
 
+        // return set of contacts
         return ret;
     }
 
+    /**
+     * <code>getContacts()</code> by name
+     * {@inheritDoc}
+     * <p>
+     *     After checking that the given name is not null, this method finds all contacts
+     *     with that name.
+     * </p>
+     */
     @Override
     public Set<Contact> getContacts(String name) {
 
+        // check the name is not null
         if (name == null)
             throw new NullPointerException();
 
+        // return set
         Set<Contact> ret = new HashSet<Contact>();
 
+        // iterate thought contacts
         for (Contact c : contacts) {
-
-            if (c.getName().contains(name))
-                ret.add(c);
-
+            if (c.getName().contains(name))     // if the name matches
+                ret.add(c);                     // add the contact to the return set
         }
 
+        // return set of contacts with given name
         return ret;
     }
 
+    /**
+     * <code>flush()</code>
+     * {@inheritDoc}
+     * <p>
+     *     Save details of contacts, meetings and unique ids to file.
+     * </p>
+     */
     @Override
     public void flush() {
 
-        //File contactsXml = new File(filePath);
-        Document output;
-        Element managerRoot, contactRoot, meetingRoot;
-        DocumentBuilderFactory docFactory;
-        DocumentBuilder docBuilder;
+        // file write setup
+        Document output;                                    // document to be output to file
+        Element managerRoot, contactRoot, meetingRoot;      // xml elements
+        DocumentBuilderFactory docFactory;                  // for xml output
+        DocumentBuilder docBuilder;                         // for xml output
 
+        // file write
         try {
-/*
-
-            if(!contactsXml.exists())            // if file doesn't already exist
-                contactsXml.createNewFile();        // create the file
-*/
 
             docFactory = DocumentBuilderFactory.newInstance();
             docBuilder = docFactory.newDocumentBuilder();
 
-            // root element - contactmanager
+            // 1. root element - contactmanager
             output = docBuilder.newDocument();
             Element rootElement = output.createElement("contactmanager");
             output.appendChild(rootElement);
 
-            // manager element - manager
+            // 2. manager element - manager
             managerRoot = output.createElement("manager");
             rootElement.appendChild(managerRoot);
 
+            // output unique id seed
             Element eId = output.createElement("CM_ID");
             eId.appendChild(output.createTextNode("" + CM_ID));
             managerRoot.appendChild(eId);
 
-            // contacts element - contact
+            // 3. contacts element - contact
             contactRoot = output.createElement("contacts");
             rootElement.appendChild(contactRoot);
 
-            // meetings element - meeting
+            // 4. meetings element - meeting
             meetingRoot = output.createElement("meetings");
             rootElement.appendChild(meetingRoot);
 
-            // add contacts
-
+            // write contacts to document
             for (Contact c : contacts) {
+                // call internal method to setup contact elements
                 addContactElement(output, contactRoot, "" + c.getId(), c.getName(), c.getNotes());
             }
 
+            // write meetings to output
             for (Object m : meetings) {
 
+                // check meeting type
                 if (m instanceof PastMeeting) {
 
+                    // call internal method to setup meeting element
                     PastMeeting pm = (PastMeeting) m;
                     addMeetingElement(output,
                             meetingRoot,
@@ -722,6 +797,7 @@ public class ContactManagerImpl implements ContactManager {
 
                 } else if (m instanceof FutureMeeting) {
 
+                    // call internal method to setup meeting element
                     FutureMeeting fm = (FutureMeeting) m;
                     addMeetingElement(output,
                             meetingRoot,
@@ -735,7 +811,7 @@ public class ContactManagerImpl implements ContactManager {
 
             }
 
-            // write the content into xml file
+            // write the output into xml file
             TransformerFactory transformerFactory = TransformerFactory.newInstance();
             Transformer transformer = transformerFactory.newTransformer();
             DOMSource source = new DOMSource(output);
@@ -744,23 +820,29 @@ public class ContactManagerImpl implements ContactManager {
             // Output to console for testing
             //StreamResult result = new StreamResult(System.out);
 
+            // write
             transformer.transform(source, result);
 
+        // handle exceptions
         } catch (ParserConfigurationException pce) {
             pce.printStackTrace();
         } catch (TransformerException tfe) {
             tfe.printStackTrace();
-        }/* catch (IOException ioe) {
-            ioe.printStackTrace();
-        }*/
+        }
 
     }
 
-    // internal methods for xml construction
+    /* P R I V A T E   M E T H O D S */
 
+    /**
+     * <code>addContactElement()</code>
+     * <p>
+     *     Creates an xml element for a contact
+     * </p>
+     */
     private void addContactElement(Document output, Element root, String id, String name, String notes) {
 
-        Element contact, eName, eNotes;
+        Element contact, eName, eNotes;     // elements
 
         // contact root
         contact = output.createElement("contact");
@@ -781,6 +863,12 @@ public class ContactManagerImpl implements ContactManager {
 
     }
 
+    /**
+     * <code>addMeetingElement()</code>
+     * <p>
+     *     Creates an xml element for a meeting
+     * </p>
+     */
     private void addMeetingElement(Document output,
                                    Element root,
                                    String id,
@@ -789,7 +877,7 @@ public class ContactManagerImpl implements ContactManager {
                                    Set<Contact> meetingContacts,
                                    String notes) {
 
-        Element meeting, eDate, eMeetingContacts, eNotes;
+        Element meeting, eDate, eMeetingContacts, eNotes;       // elements
 
         // meeting root
         meeting = output.createElement("meeting");
@@ -808,6 +896,7 @@ public class ContactManagerImpl implements ContactManager {
         eMeetingContacts = output.createElement("meetingContacts");
         meeting.appendChild(eMeetingContacts);
 
+        // iterate through set of contacts
         for (Contact c : meetingContacts) {
 
             Element contact = output.createElement("meetingContact");
@@ -824,9 +913,15 @@ public class ContactManagerImpl implements ContactManager {
     }
 
 
+    /**
+     * <code>sortMeetingList()</code>
+     * <p>
+     *     Rearranges the given list of meetings into chronological order
+     * </p>
+     */
+    private void sortMeetingList(List<Meeting> toSort) {
 
-    public void sortMeetingList(List<Meeting> toSort) {
-
+        // setup comparator class to check meetings based on their meeting date
         Comparator<? super Meeting> comp = new Comparator<Meeting>() {
             @Override
             public int compare(Meeting o1, Meeting o2) {
@@ -834,12 +929,20 @@ public class ContactManagerImpl implements ContactManager {
             }
         };
 
+        // apply comparator to the given list
         Collections.sort(toSort, (Comparator) comp);
 
     }
 
-    public void sortPastMeetingList(List<PastMeeting> toSort) {
+    /**
+     * <code>sortPastMeetingList()</code>
+     * <p>
+     *     Rearranges the given list of past meetings into chronological order
+     * </p>
+     */
+    private void sortPastMeetingList(List<PastMeeting> toSort) {
 
+        // setup comparator class to check meetings based on their meeting date
         Comparator<? super Meeting> comp = new Comparator<Meeting>() {
             @Override
             public int compare(Meeting o1, Meeting o2) {
@@ -847,73 +950,112 @@ public class ContactManagerImpl implements ContactManager {
             }
         };
 
+        // apply comparator to the given list
         Collections.sort(toSort, (Comparator) comp);
 
     }
 
+    /**
+     * <code>checkContactExists()</code>
+     * <p>
+     *     Checks a given contact to see if it exists in the internal set of contacts. Calls method checker
+     *     for sets of contacts {@link #checkContactsExist(Set) checkContactsExist}.
+     * </p>
+     *
+     * @return true if contact exists
+     */
     private boolean checkContactExists(Contact c) {
 
+        // create set with the given contact
         Set<Contact> cs = new HashSet<Contact>();
         cs.add(c);
 
+        // call internal method to check existence of contacts
+        // and return value
         return checkContactsExist(cs);
 
     }
 
+    /**
+     * <code>checkContactsExist()</code>
+     * <p>
+     *     Checks a given set of contact to see if each contact contains exists in the internal set of contacts
+     * </p>
+     *
+     * @return true if all contact exists
+     */
     private boolean checkContactsExist(Set<Contact> checkContacts) {
 
+        // return value
         boolean ret = true;
 
+        // iterate through given set of contacts
         for (Contact c : checkContacts) {
 
-            boolean exists = false;
+            boolean exists = false;             // existence flag
 
+            // iterate through contact manager's set of contacts
             for (Contact known : this.contacts) {
 
-                if (known.getId() == c.getId())
-                    exists = true;
+                if (known.getId() == c.getId()) // if id matches
+                    exists = true;              // set flag to true
 
             }
 
+            // if any contact is not found
             if (!exists)
-                ret = false;
+                ret = false;    // set return to false
 
         }
 
+        // return boolean
         return ret;
 
     }
 
-    private synchronized void updateMeetingTypes() {
+    /**
+     * <code>updateMeetingTypes()</code>
+     * <p>
+     *     This method checks the date of each scheduled meeting and converts any future meetings
+     *     to past meetings if the date has now past.
+     * </p>
+     */
+    private void updateMeetingTypes() {
 
+        // Initialise list to populate with updated meetings
         List<Meeting> updatedMeetings = new ArrayList<Meeting>();
 
+        // for each meeting
         for (Object m : meetings) {
 
+            // check the meeting type
             if (m instanceof FutureMeeting) {
 
+                // for all future meetings
                 FutureMeeting fm = (FutureMeeting) m;
 
+                // compare the meeting date against the current time
                 Calendar now = Calendar.getInstance();
-                if (now.compareTo(fm.getDate()) > 0) {
+                if (now.compareTo(fm.getDate()) > 0) {              // if the time has past
 
-                    PastMeeting pm = new PastMeetingImpl(fm, "");
-                    updatedMeetings.add(pm);
+                    PastMeeting pm = new PastMeetingImpl(fm, "");   // use the copy constructor to create new past meeting
+                    updatedMeetings.add(pm);                        // add past meeting to list of meetings
 
                 } else {
 
-                    updatedMeetings.add((Meeting) m);
+                    updatedMeetings.add((Meeting) m);               // add unchanged future meetings to list
 
                 }
 
             } else {
 
-                updatedMeetings.add((Meeting) m);
+                updatedMeetings.add((Meeting) m);   // add unchanged past meetings to list
 
             }
 
         }
 
+        // point internal meeting list to updated list of meetings
         meetings = updatedMeetings;
 
     }
